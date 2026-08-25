@@ -1,0 +1,23 @@
+# macOS / external-drive metadata
+.DS_Store
+._*
+
+# Local code backups
+index.single-file.backup.html
+index_备份.html
+js/*.backup.js
+backups/
+
+# Exported local world data
+雨棱镜-世界观备份-*.json
+
+# Local environment and secrets
+.env
+.env.*
+!.env.example
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*~
