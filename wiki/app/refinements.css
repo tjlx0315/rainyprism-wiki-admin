@@ -102,6 +102,7 @@
 .public-network-toolbar button { border: 0; background: transparent; color: #526a76; padding: 8px 12px; cursor: pointer; }
 .public-network-toolbar button.active { background: #54798c; color: white; }
 .public-network-toolbar > button { border: 1px solid #c2d0d7; margin-left: auto; }
+.public-network-toolbar > strong { color: #4d6876; font-weight: 600; white-space: nowrap; }
 .public-network-stage { height: min(680px,72vh); min-height: 480px; position: relative; overflow: hidden; cursor: grab; background-color: #f7fafb; background-image: radial-gradient(circle,#d8e2e7 1.3px,transparent 1.5px); background-size: 44px 38px; touch-action: none; }
 .public-network-stage:active { cursor: grabbing; }
 .public-network-world { position: absolute; inset: 0; transform-origin: 0 0; }
