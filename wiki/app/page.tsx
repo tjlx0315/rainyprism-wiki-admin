@@ -103,14 +103,14 @@ function PublicRelationGraph({data,relations,openEntry}:{data:WikiData;relations
   const graph=useMemo(()=>buildPublicGraph(data,relations),[data,relations]);
   useEffect(()=>{
     const canvas=canvasRef.current;if(!canvas)return;const ctx=canvas.getContext('2d');if(!ctx)return;
-    const dpr=Math.max(1,Math.min(2,window.devicePixelRatio||1));canvas.width=1000*dpr;canvas.height=680*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);
+    const dpr=Math.max(1,Math.min(2,window.devicePixelRatio||1));canvas.width=1000*dpr;canvas.height=900*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);
     const nodeMap=new Map(graph.nodes.map(node=>[node.id,node]));const images=new Map<string,HTMLImageElement>();
-    const draw=()=>{ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,1000,680);ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';
+    const draw=()=>{ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,1000,900);ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';
       graph.edges.forEach(edge=>{const a=nodeMap.get(edge.a),b=nodeMap.get(edge.b);if(!a||!b)return;ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.strokeStyle='rgba(105,139,158,.40)';ctx.lineWidth=1.2;ctx.stroke();if(!edge.label)return;const length=Math.hypot(b.x-a.x,b.y-a.y)||1,nx=-(b.y-a.y)/length,ny=(b.x-a.x)/length,mx=(a.x+b.x)/2+nx*10,my=(a.y+b.y)/2+ny*10;ctx.font='11px sans-serif';const width=ctx.measureText(edge.label).width;ctx.fillStyle='rgba(247,250,251,.95)';ctx.fillRect(mx-width/2-5,my-9,width+10,18);ctx.fillStyle='#657b89';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(edge.label,mx,my)});
       graph.nodes.forEach(node=>{const radius=22;ctx.save();ctx.beginPath();ctx.arc(node.x,node.y,radius,0,Math.PI*2);ctx.fillStyle='#fff';ctx.fill();const portrait=node.image?images.get(node.image):undefined;if(portrait?.complete&&portrait.naturalWidth){ctx.clip();const inner=radius-3,scale=Math.min(inner*2/portrait.naturalWidth,inner*2/portrait.naturalHeight),width=portrait.naturalWidth*scale,height=portrait.naturalHeight*scale;ctx.drawImage(portrait,node.x-width/2,node.y-height/2,width,height)}ctx.restore();ctx.beginPath();ctx.arc(node.x,node.y,radius,0,Math.PI*2);ctx.strokeStyle='#82b4c7';ctx.lineWidth=2.4;ctx.stroke();if(!node.image){ctx.fillStyle='#638899';ctx.font='600 18px Georgia,serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText([...node.name][0]||'人',node.x,node.y)}ctx.fillStyle='#526a78';ctx.font='12px sans-serif';ctx.textAlign='center';ctx.textBaseline='top';ctx.fillText(node.name,node.x,node.y+radius+5)})};
     graph.nodes.forEach(node=>{if(!node.image||images.has(node.image))return;const image=new Image();images.set(node.image,image);image.onload=draw;image.src=node.image});draw();
   },[graph]);
-  const point=(event:React.MouseEvent<HTMLCanvasElement>)=>{const rect=event.currentTarget.getBoundingClientRect();return{x:(event.clientX-rect.left)*1000/rect.width,y:(event.clientY-rect.top)*680/rect.height}};
+  const point=(event:React.MouseEvent<HTMLCanvasElement>)=>{const rect=event.currentTarget.getBoundingClientRect();return{x:(event.clientX-rect.left)*1000/rect.width,y:(event.clientY-rect.top)*900/rect.height}};
   const hit=(x:number,y:number)=>graph.nodes.find(node=>Math.hypot(node.x-x,node.y-y)<=30);
   return <section className="public-network readonly"><div className="public-network-toolbar"><strong>人物关系</strong><span>点击人物打开词条</span></div><div className="public-network-stage"><canvas ref={canvasRef} aria-label="人物关系网" onClick={event=>{const p=point(event),node=hit(p.x,p.y);if(node)openEntry(node.id)}} onMouseMove={event=>{const p=point(event);event.currentTarget.style.cursor=hit(p.x,p.y)?'pointer':'default'}}/></div></section>
 }
@@ -126,8 +126,8 @@ function buildPublicGraph(data:WikiData,relations:Relation[]):{nodes:GraphNode[]
   const primaryIds=(data.network?.primaryIds?.length?data.network.primaryIds:source.filter(entry=>entry.folderName==='主要角色').map(entry=>entry.id)).filter(id=>visibleIds.has(id)).slice(0,6);
   const coreIds=new Set(primaryIds);
   const positions=new Map<string,{x:number;y:number;angle:number;core?:boolean}>();
-  const center={x:500,y:340},coreRadius=145;
-  const clamp=(point:{x:number;y:number})=>({x:Math.max(60,Math.min(940,point.x)),y:Math.max(60,Math.min(610,point.y))});
+  const center={x:500,y:450},coreRadius=175;
+  const clamp=(point:{x:number;y:number})=>({x:Math.max(54,Math.min(946,point.x)),y:Math.max(54,Math.min(826,point.y))});
   primaryIds.forEach((id,index)=>{const angle=-Math.PI/2+index*Math.PI*2/Math.max(primaryIds.length,1);positions.set(id,{x:center.x+Math.cos(angle)*coreRadius,y:center.y+Math.sin(angle)*coreRadius,angle,core:true})});
   const adjacency=new Map(source.map(entry=>[entry.id,[] as string[]]));
   edges.forEach(edge=>{adjacency.get(edge.a)?.push(edge.b);adjacency.get(edge.b)?.push(edge.a)});
@@ -137,7 +137,7 @@ function buildPublicGraph(data:WikiData,relations:Relation[]):{nodes:GraphNode[]
   const childCounts=new Map<string,number>();
   for(let pass=0;pass<5;pass++)source.forEach(entry=>{if(positions.has(entry.id))return;const parentId=(adjacency.get(entry.id)||[]).find(id=>positions.has(id));if(!parentId)return;const parent=positions.get(parentId)!;const count=childCounts.get(parentId)||0;childCounts.set(parentId,count+1);const baseAngle=Math.atan2(parent.y-center.y,parent.x-center.x),angle=baseAngle+(count%2?1:-1)*Math.ceil(count/2)*.2;positions.set(entry.id,{...clamp({x:parent.x+Math.cos(angle)*96,y:parent.y+Math.sin(angle)*96}),angle})});
   const remaining=source.filter(entry=>!positions.has(entry.id));
-  remaining.forEach((entry,index)=>{const angle=-Math.PI/2+index*Math.PI*2/Math.max(remaining.length,1);positions.set(entry.id,{...clamp({x:center.x+Math.cos(angle)*292,y:center.y+Math.sin(angle)*292}),angle})});
+  remaining.forEach((entry,index)=>{const angle=-Math.PI/2+index*Math.PI*2/Math.max(remaining.length,1);positions.set(entry.id,{...clamp({x:center.x+Math.cos(angle)*387,y:center.y+Math.sin(angle)*387}),angle})});
   const positionedIds=source.map(entry=>entry.id);
   for(let pass=0;pass<80;pass++){let moved=false;for(let i=0;i<positionedIds.length;i++)for(let j=i+1;j<positionedIds.length;j++){const a=positions.get(positionedIds[i])!,b=positions.get(positionedIds[j])!;let dx=b.x-a.x,dy=b.y-a.y,distance=Math.hypot(dx,dy);if(distance>=82)continue;if(distance<.01){const angle=(i*2.399963+j*.73)%(Math.PI*2);dx=Math.cos(angle);dy=Math.sin(angle);distance=1}const push=(82-distance)/2+.6,ux=dx/distance,uy=dy/distance;if(!a.core&&!b.core){a.x-=ux*push;a.y-=uy*push;b.x+=ux*push;b.y+=uy*push}else if(a.core&&!b.core){b.x+=ux*push*2;b.y+=uy*push*2}else if(!a.core&&b.core){a.x-=ux*push*2;a.y-=uy*push*2}if(!a.core)Object.assign(a,clamp(a));if(!b.core)Object.assign(b,clamp(b));moved=true}if(!moved)break}
   const nodes:GraphNode[]=source.map(entry=>({...entry,...positions.get(entry.id)!,core:coreIds.has(entry.id)}));
