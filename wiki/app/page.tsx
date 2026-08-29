@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 type View = 'home' | 'category' | 'article' | 'relations' | 'timeline' | 'map';
 type Entry = { id:string; name:string; type:string; subtype?:string; folderId?:string; folderName?:string; subtitle?:string; summary?:string; image?:string; facts?:string[][]; sections?:Array<{title:string;paragraphs:string[]}> };
@@ -99,12 +99,20 @@ type GraphNode = Entry & {x:number;y:number;core:boolean};
 type GraphEdge = {id:string;a:string;b:string;label:string};
 
 function PublicRelationGraph({data,relations,openEntry}:{data:WikiData;relations:Relation[];openEntry:(id:string)=>void}){
-  const [view,setView]=useState({x:0,y:0,scale:1});
-  const [drag,setDrag]=useState<{x:number;y:number;originX:number;originY:number}|null>(null);
+  const canvasRef=useRef<HTMLCanvasElement>(null);
   const graph=useMemo(()=>buildPublicGraph(data,relations),[data,relations]);
-  const nodeMap=useMemo(()=>new Map(graph.nodes.map(node=>[node.id,node])),[graph.nodes]);
-  const reset=()=>setView({x:0,y:0,scale:1});
-  return <section className="public-network"><div className="public-network-toolbar"><strong>后台布局</strong><span>保持编辑器中的人物位置 · 滚轮缩放 · 拖动画布 · 双击人物打开词条</span><button onClick={reset}>居中显示</button></div><div className="public-network-stage" onWheel={event=>{event.preventDefault();const rect=event.currentTarget.getBoundingClientRect();const px=event.clientX-rect.left;const py=event.clientY-rect.top;const next=Math.max(.45,Math.min(2.2,view.scale*Math.exp(-event.deltaY*.001)));const worldX=(px-view.x)/view.scale;const worldY=(py-view.y)/view.scale;setView({scale:next,x:px-worldX*next,y:py-worldY*next})}} onPointerDown={event=>{if((event.target as HTMLElement).closest('.public-node'))return;event.currentTarget.setPointerCapture(event.pointerId);setDrag({x:event.clientX,y:event.clientY,originX:view.x,originY:view.y})}} onPointerMove={event=>{if(drag)setView(current=>({...current,x:drag.originX+event.clientX-drag.x,y:drag.originY+event.clientY-drag.y}))}} onPointerUp={()=>setDrag(null)} onPointerCancel={()=>setDrag(null)}><div className="public-network-world" style={{transform:`translate(${view.x}px,${view.y}px) scale(${view.scale})`}}><svg viewBox="0 0 1000 680" preserveAspectRatio="none" aria-hidden="true">{graph.edges.map(edge=>{const a=nodeMap.get(edge.a);const b=nodeMap.get(edge.b);if(!a||!b)return null;const cx=(a.x+b.x)/2,cy=(a.y+b.y)/2;return <g key={edge.id}><path d={`M ${a.x} ${a.y} L ${b.x} ${b.y}`}/><foreignObject x={cx-58} y={cy-14} width="116" height="28"><div className="public-edge-label">{edge.label}</div></foreignObject></g>})}</svg>{graph.nodes.map(node=><button key={node.id} className={`public-node ${node.core?'core':''}`} style={{left:`${node.x/10}%`,top:`${node.y/6.8}%`}} onDoubleClick={()=>openEntry(node.id)} title={`双击打开${node.name}`}>{node.image?<span className="public-node-image"><img src={node.image} alt=""/></span>:<span className="public-node-empty">{[...node.name][0]||'人'}</span>}<b>{node.name}</b></button>)}</div></div></section>
+  useEffect(()=>{
+    const canvas=canvasRef.current;if(!canvas)return;const ctx=canvas.getContext('2d');if(!ctx)return;
+    const dpr=Math.max(1,Math.min(2,window.devicePixelRatio||1));canvas.width=1000*dpr;canvas.height=680*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);
+    const nodeMap=new Map(graph.nodes.map(node=>[node.id,node]));const images=new Map<string,HTMLImageElement>();
+    const draw=()=>{ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,1000,680);ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';
+      graph.edges.forEach(edge=>{const a=nodeMap.get(edge.a),b=nodeMap.get(edge.b);if(!a||!b)return;ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.strokeStyle='rgba(105,139,158,.40)';ctx.lineWidth=1.2;ctx.stroke();if(!edge.label)return;const length=Math.hypot(b.x-a.x,b.y-a.y)||1,nx=-(b.y-a.y)/length,ny=(b.x-a.x)/length,mx=(a.x+b.x)/2+nx*10,my=(a.y+b.y)/2+ny*10;ctx.font='11px sans-serif';const width=ctx.measureText(edge.label).width;ctx.fillStyle='rgba(247,250,251,.95)';ctx.fillRect(mx-width/2-5,my-9,width+10,18);ctx.fillStyle='#657b89';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(edge.label,mx,my)});
+      graph.nodes.forEach(node=>{const radius=22;ctx.save();ctx.beginPath();ctx.arc(node.x,node.y,radius,0,Math.PI*2);ctx.fillStyle='#fff';ctx.fill();const portrait=node.image?images.get(node.image):undefined;if(portrait?.complete&&portrait.naturalWidth){ctx.clip();const inner=radius-3,scale=Math.min(inner*2/portrait.naturalWidth,inner*2/portrait.naturalHeight),width=portrait.naturalWidth*scale,height=portrait.naturalHeight*scale;ctx.drawImage(portrait,node.x-width/2,node.y-height/2,width,height)}ctx.restore();ctx.beginPath();ctx.arc(node.x,node.y,radius,0,Math.PI*2);ctx.strokeStyle='#82b4c7';ctx.lineWidth=2.4;ctx.stroke();if(!node.image){ctx.fillStyle='#638899';ctx.font='600 18px Georgia,serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText([...node.name][0]||'人',node.x,node.y)}ctx.fillStyle='#526a78';ctx.font='12px sans-serif';ctx.textAlign='center';ctx.textBaseline='top';ctx.fillText(node.name,node.x,node.y+radius+5)})};
+    graph.nodes.forEach(node=>{if(!node.image||images.has(node.image))return;const image=new Image();images.set(node.image,image);image.onload=draw;image.src=node.image});draw();
+  },[graph]);
+  const point=(event:React.MouseEvent<HTMLCanvasElement>)=>{const rect=event.currentTarget.getBoundingClientRect();return{x:(event.clientX-rect.left)*1000/rect.width,y:(event.clientY-rect.top)*680/rect.height}};
+  const hit=(x:number,y:number)=>graph.nodes.find(node=>Math.hypot(node.x-x,node.y-y)<=30);
+  return <section className="public-network readonly"><div className="public-network-toolbar"><strong>人物关系</strong><span>点击人物打开词条</span></div><div className="public-network-stage"><canvas ref={canvasRef} aria-label="人物关系网" onClick={event=>{const p=point(event),node=hit(p.x,p.y);if(node)openEntry(node.id)}} onMouseMove={event=>{const p=point(event);event.currentTarget.style.cursor=hit(p.x,p.y)?'pointer':'default'}}/></div></section>
 }
 
 function buildPublicGraph(data:WikiData,relations:Relation[]):{nodes:GraphNode[];edges:GraphEdge[]}{
