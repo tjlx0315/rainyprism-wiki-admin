@@ -69,11 +69,12 @@ function LocalImporter({data,onData}:{data:WikiData|null;onData:(data:WikiData|n
   const [visible,setVisible]=useState(false);
   const [expanded,setExpanded]=useState(false);
   const [message,setMessage]=useState('');
-  useEffect(()=>{const local=['localhost','127.0.0.1'].includes(location.hostname);setVisible(local&&new URLSearchParams(location.search).get('manage')==='1')},[]);
+  useEffect(()=>{setVisible(new URLSearchParams(location.search).get('manage')==='1')},[]);
   if(!visible)return null;
   const importFile=async(file?:File)=>{if(!file)return;try{const value=validateData(JSON.parse(await file.text()));localStorage.setItem(STORAGE_KEY,JSON.stringify(value));onData(value);setMessage(`导入成功：${value.entries.length} 个词条`) }catch(error){setMessage(`导入失败：${error instanceof Error?error.message:'文件错误'}`)}};
+  const downloadData=()=>{if(!data)return;const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const link=document.createElement('a');link.href=url;link.download='wiki-data.json';link.click();URL.revokeObjectURL(url);setMessage('已下载 wiki-data.json；用 GitHub Desktop 发布后，所有访客都会看到这份资料')};
   if(!expanded)return <button className="wiki-import-toggle" onClick={()=>setExpanded(true)}>管理数据</button>;
-  return <aside className="wiki-importer"><div><b>本机百科数据预览</b><span>只在 localhost 管理地址显示，不是网络登录入口</span></div><label className="import-button">选择百科 JSON<input type="file" accept="application/json,.json" onChange={event=>importFile(event.target.files?.[0])}/></label>{data&&<button onClick={()=>{localStorage.removeItem(STORAGE_KEY);onData(null);setMessage('已清除本机预览数据')}}>清除预览</button>}<button className="import-collapse" onClick={()=>setExpanded(false)}>收起</button>{message&&<p>{message}</p>}</aside>;
+  return <aside className="wiki-importer"><div><b>百科数据管理</b><span>导入只影响当前浏览器；不会让访客修改公开网站</span></div><label className="import-button">选择百科 JSON<input type="file" accept="application/json,.json" onChange={event=>importFile(event.target.files?.[0])}/></label>{data&&<button onClick={downloadData}>下载公开数据</button>}{data&&<button onClick={()=>{localStorage.removeItem(STORAGE_KEY);onData(null);setMessage('已清除本机预览数据')}}>清除预览</button>}<button className="import-collapse" onClick={()=>setExpanded(false)}>收起</button>{message&&<p>{message}</p>}<small className="import-help">预览确认后，将 wiki-data.json 放入仓库的 wiki/public 文件夹，再用 GitHub Desktop 推送，即可更新所有访客看到的内容。</small></aside>;
 }
 
 function WikiHome({data,openEntry,openCategory,nav}:{data:WikiData|null;openEntry:(id:string)=>void;openCategory:(type:string)=>void;nav:(view:View)=>void}){
