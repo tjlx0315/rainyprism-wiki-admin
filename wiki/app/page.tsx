@@ -100,6 +100,9 @@ type GraphEdge = {id:string;a:string;b:string;label:string};
 
 function PublicRelationGraph({data,relations,openEntry}:{data:WikiData;relations:Relation[];openEntry:(id:string)=>void}){
   const canvasRef=useRef<HTMLCanvasElement>(null);
+  const movedRef=useRef(false);
+  const [view,setView]=useState({x:0,y:0,scale:.78});
+  const [drag,setDrag]=useState<{x:number;y:number;originX:number;originY:number}|null>(null);
   const graph=useMemo(()=>buildPublicGraph(data,relations),[data,relations]);
   useEffect(()=>{
     const canvas=canvasRef.current;if(!canvas)return;const ctx=canvas.getContext('2d');if(!ctx)return;
@@ -112,7 +115,8 @@ function PublicRelationGraph({data,relations,openEntry}:{data:WikiData;relations
   },[graph]);
   const point=(event:React.MouseEvent<HTMLCanvasElement>)=>{const rect=event.currentTarget.getBoundingClientRect();return{x:(event.clientX-rect.left)*1000/rect.width,y:(event.clientY-rect.top)*900/rect.height}};
   const hit=(x:number,y:number)=>graph.nodes.find(node=>Math.hypot(node.x-x,node.y-y)<=30);
-  return <section className="public-network readonly"><div className="public-network-toolbar"><strong>人物关系</strong><span>点击人物打开词条</span></div><div className="public-network-stage"><canvas ref={canvasRef} aria-label="人物关系网" onClick={event=>{const p=point(event),node=hit(p.x,p.y);if(node)openEntry(node.id)}} onMouseMove={event=>{const p=point(event);event.currentTarget.style.cursor=hit(p.x,p.y)?'pointer':'default'}}/></div></section>
+  const zoom=(next:number)=>setView(current=>({...current,scale:Math.max(.45,Math.min(1.8,next))}));
+  return <section className="public-network readonly"><div className="public-network-toolbar"><strong>人物关系</strong><span>滚轮缩放 · 按住拖动画布 · 点击人物打开词条</span><div className="network-view-buttons"><button onClick={()=>zoom(view.scale-.1)} aria-label="缩小">−</button><output>{Math.round(view.scale*100)}%</output><button onClick={()=>zoom(view.scale+.1)} aria-label="放大">＋</button><button onClick={()=>setView({x:0,y:0,scale:.78})}>重置</button></div></div><div className="public-network-stage" onWheel={event=>{event.preventDefault();zoom(view.scale*Math.exp(-event.deltaY*.0012))}} onPointerDown={event=>{event.currentTarget.setPointerCapture(event.pointerId);movedRef.current=false;setDrag({x:event.clientX,y:event.clientY,originX:view.x,originY:view.y})}} onPointerMove={event=>{if(!drag)return;const dx=event.clientX-drag.x,dy=event.clientY-drag.y;if(Math.hypot(dx,dy)>3)movedRef.current=true;setView(current=>({...current,x:drag.originX+dx,y:drag.originY+dy}))}} onPointerUp={()=>setDrag(null)} onPointerCancel={()=>setDrag(null)}><div className="public-network-canvas-world" style={{transform:`translate(-50%,-50%) translate(${view.x}px,${view.y}px) scale(${view.scale})`}}><canvas ref={canvasRef} aria-label="人物关系网" onClick={event=>{if(movedRef.current){movedRef.current=false;return}const p=point(event),node=hit(p.x,p.y);if(node)openEntry(node.id)}} onMouseMove={event=>{if(drag){event.currentTarget.style.cursor='grabbing';return}const p=point(event);event.currentTarget.style.cursor=hit(p.x,p.y)?'pointer':'grab'}}/></div></div></section>
 }
 
 function buildPublicGraph(data:WikiData,relations:Relation[]):{nodes:GraphNode[];edges:GraphEdge[]}{
