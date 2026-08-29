@@ -32,7 +32,7 @@ export default function Home(){
     if(saved){
       try{setData(validateData(JSON.parse(saved)));return}catch{localStorage.removeItem(STORAGE_KEY)}
     }
-    fetch('/wiki-data.json',{cache:'no-store'})
+    fetch(`${process.env.NEXT_PUBLIC_BASE_PATH || ''}/wiki-data.json`,{cache:'no-store'})
       .then(response=>response.ok?response.json():null)
       .then(value=>{if(value)setData(validateData(value))})
       .catch(()=>undefined);
