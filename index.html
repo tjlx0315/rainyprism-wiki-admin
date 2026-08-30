@@ -6,7 +6,7 @@
 
 <title>雨棱镜｜世界观百科后台 V1</title>
 
-<link rel="stylesheet" href="./css/app.css">
+<link rel="stylesheet" href="./css/app.css?v=3">
 </head>
 
 
@@ -73,6 +73,7 @@
           <div id="cardGrid" class="catalog-list"></div>
           <button id="newCardBtn" class="btn primary catalog-new">＋ 新建卡片</button>
           <div class="catalog-data-tools">
+            <button id="exportWikiDataBtn" class="btn primary" type="button">发布百科</button>
             <button id="exportDataBtn" class="btn" type="button">导出备份</button>
             <button id="importDataBtn" class="btn" type="button">导入备份</button>
           </div>
@@ -126,18 +127,54 @@
               </h1>
 
               <div class="view-desc">
-                所有卡片之间的结构关系
+                按住 Shift，依次点击两个角色即可添加人物关系
               </div>
 
             </div>
 
             <div class="filters">
 
+              <select id="relationTypeFilter">
+                <option value="">全部类型</option>
+                <option value="角色" selected>只看角色</option>
+                <option value="组织">只看组织</option>
+                <option value="地区">只看地区</option>
+                <option value="事件">只看事件</option>
+                <option value="其他">只看其他</option>
+              </select>
+
               <select id="relationFocus">
                 <option value="">
                   全部卡片
                 </option>
               </select>
+
+              <select id="relationLayoutMode">
+                <option value="free">自由布局</option>
+                <option value="primary">主要角色居中</option>
+              </select>
+
+              <select id="relationPrimaryFolder" title="核心角色文件夹">
+                <option value="">选择核心文件夹</option>
+              </select>
+
+              <select id="relationSnapMode">
+                <option value="off">关闭吸附</option>
+                <option value="square">方形网格吸附</option>
+                <option value="hex">六边形吸附</option>
+              </select>
+
+              <details class="network-relation-filter">
+                <summary>关系显示</summary>
+                <div id="networkRelationFilterList" class="network-relation-filter-list"></div>
+              </details>
+
+              <div class="network-viewport-controls" aria-label="关系网视图控制">
+                <button id="fitNetworkBtn" class="btn" type="button">适应全部</button>
+                <button id="centerPrimaryNetworkBtn" class="btn" type="button">主要角色居中</button>
+                <button id="resetNetworkZoomBtn" class="btn" type="button">100%</button>
+                <span id="networkZoomValue" class="network-zoom-value">100%</span>
+              </div>
 
               <button
                 id="resetNetworkBtn"
@@ -190,6 +227,10 @@
               </div>
 
             </div>
+
+            <button id="newTimelineNodeBtn" class="btn primary" type="button">
+              ＋ 新建时间节点
+            </button>
 
           </div>
 
@@ -294,8 +335,8 @@
 ></div>
 
 
-<script src="./js/storage.js"></script>
-<script src="./js/app.js"></script>
+<script src="./js/storage.js?v=3"></script>
+<script src="./js/app.js?v=8"></script>
 
 </body>
 </html>
