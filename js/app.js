@@ -5743,11 +5743,19 @@ function deleteRelation(
 
 function openTimelineNodeDrawer(
   moduleId,
-  nodeId
+  nodeId,
+  sourceCardId = null
 ){
 
   const card =
-    getCurrentCard();
+    sourceCardId
+    ? getCard(sourceCardId)
+    : getCurrentCard();
+
+
+  if(!card){
+    return;
+  }
 
   const module =
     getModule(
@@ -6113,9 +6121,13 @@ function openTimelineNodeDrawer(
 
     closeDrawer();
 
-    renderModules();
+    if(currentCardId === card.id){
+      renderModules();
+    }
 
     refreshGlobalSelectors();
+
+    renderGlobalTimeline();
 
     toast(
       "时间节点已保存"
@@ -7327,13 +7339,25 @@ function openTimelineDetail(
 
     <div class="detail-section">
 
-      <button
-        id="timelineOpenSourceCard"
-        class="btn"
-        style="width:100%"
-      >
-        打开「${escapeHTML(card.name)}」
-      </button>
+      <div class="inline-row">
+
+        <button
+          id="timelineEditNode"
+          class="btn primary"
+          style="flex:1"
+        >
+          编辑节点
+        </button>
+
+        <button
+          id="timelineOpenSourceCard"
+          class="btn"
+          style="flex:1"
+        >
+          打开「${escapeHTML(card.name)}」
+        </button>
+
+      </div>
 
     </div>
 
@@ -7349,6 +7373,21 @@ function openTimelineDetail(
     "closeTimelineDetail"
   ).onclick =
     closeTimelineDetail;
+
+
+  document.getElementById(
+    "timelineEditNode"
+  ).onclick = ()=>{
+
+    closeTimelineDetail();
+
+    openTimelineNodeDrawer(
+      moduleId,
+      nodeId,
+      cardId
+    );
+
+  };
 
 
   document.getElementById(
