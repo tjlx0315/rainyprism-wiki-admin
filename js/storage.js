@@ -585,7 +585,10 @@ function readableItem(item,module){
     timeline,
     network:{
       positions:Object.fromEntries(
-        Object.entries(db.settings.networkPositions || {})
+        Object.entries({
+          ...(db.settings.networkPositions || {}),
+          ...Object.fromEntries((typeof networkRuntime !== "undefined" && Array.isArray(networkRuntime?.nodes) ? networkRuntime.nodes : []).map(node => [node.id,{x:node.x,y:node.y}]))
+        })
           .filter(([id,position]) => cardById.get(id)?.type === "角色" && Number.isFinite(Number(position?.x)) && Number.isFinite(Number(position?.y)))
           .map(([id,position]) => [id,{x:Number(position.x),y:Number(position.y)}])
       ),

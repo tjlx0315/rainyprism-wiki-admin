@@ -207,8 +207,18 @@ function buildPublicGraph(data:WikiData,relations:Relation[]):{nodes:GraphNode[]
   for(let pass=0;pass<5;pass++)source.forEach(entry=>{if(positions.has(entry.id))return;const parentId=(adjacency.get(entry.id)||[]).find(id=>positions.has(id));if(!parentId)return;const parent=positions.get(parentId)!;const count=childCounts.get(parentId)||0;childCounts.set(parentId,count+1);const baseAngle=Math.atan2(parent.y-center.y,parent.x-center.x),angle=baseAngle+(count%2?1:-1)*Math.ceil(count/2)*.2;positions.set(entry.id,{...clamp({x:parent.x+Math.cos(angle)*96,y:parent.y+Math.sin(angle)*96}),angle})});
   const remaining=source.filter(entry=>!positions.has(entry.id));
   remaining.forEach((entry,index)=>{const angle=-Math.PI/2+index*Math.PI*2/Math.max(remaining.length,1);positions.set(entry.id,{...clamp({x:center.x+Math.cos(angle)*387,y:center.y+Math.sin(angle)*387}),angle})});
+  const savedLayout=source.flatMap(entry=>{const point=data.network?.positions?.[entry.id];return point&&Number.isFinite(point.x)&&Number.isFinite(point.y)?[{id:entry.id,x:point.x,y:point.y}]:[]});
+  const usesSavedLayout=savedLayout.length>=2&&savedLayout.length===source.length;
+  if(usesSavedLayout){
+    const minX=Math.min(...savedLayout.map(point=>point.x)),maxX=Math.max(...savedLayout.map(point=>point.x));
+    const minY=Math.min(...savedLayout.map(point=>point.y)),maxY=Math.max(...savedLayout.map(point=>point.y));
+    const width=Math.max(1,maxX-minX),height=Math.max(1,maxY-minY);
+    const scale=Math.min(840/width,720/height);
+    const offsetX=500-(minX+maxX)/2*scale,offsetY=440-(minY+maxY)/2*scale;
+    savedLayout.forEach(point=>positions.set(point.id,{x:point.x*scale+offsetX,y:point.y*scale+offsetY,angle:0,core:coreIds.has(point.id)}));
+  }
   const positionedIds=source.map(entry=>entry.id);
-  for(let pass=0;pass<80;pass++){let moved=false;for(let i=0;i<positionedIds.length;i++)for(let j=i+1;j<positionedIds.length;j++){const a=positions.get(positionedIds[i])!,b=positions.get(positionedIds[j])!;let dx=b.x-a.x,dy=b.y-a.y,distance=Math.hypot(dx,dy);if(distance>=82)continue;if(distance<.01){const angle=(i*2.399963+j*.73)%(Math.PI*2);dx=Math.cos(angle);dy=Math.sin(angle);distance=1}const push=(82-distance)/2+.6,ux=dx/distance,uy=dy/distance;if(!a.core&&!b.core){a.x-=ux*push;a.y-=uy*push;b.x+=ux*push;b.y+=uy*push}else if(a.core&&!b.core){b.x+=ux*push*2;b.y+=uy*push*2}else if(!a.core&&b.core){a.x-=ux*push*2;a.y-=uy*push*2}if(!a.core)Object.assign(a,clamp(a));if(!b.core)Object.assign(b,clamp(b));moved=true}if(!moved)break}
+  if(!usesSavedLayout)for(let pass=0;pass<80;pass++){let moved=false;for(let i=0;i<positionedIds.length;i++)for(let j=i+1;j<positionedIds.length;j++){const a=positions.get(positionedIds[i])!,b=positions.get(positionedIds[j])!;let dx=b.x-a.x,dy=b.y-a.y,distance=Math.hypot(dx,dy);if(distance>=82)continue;if(distance<.01){const angle=(i*2.399963+j*.73)%(Math.PI*2);dx=Math.cos(angle);dy=Math.sin(angle);distance=1}const push=(82-distance)/2+.6,ux=dx/distance,uy=dy/distance;if(!a.core&&!b.core){a.x-=ux*push;a.y-=uy*push;b.x+=ux*push;b.y+=uy*push}else if(a.core&&!b.core){b.x+=ux*push*2;b.y+=uy*push*2}else if(!a.core&&b.core){a.x-=ux*push*2;a.y-=uy*push*2}if(!a.core)Object.assign(a,clamp(a));if(!b.core)Object.assign(b,clamp(b));moved=true}if(!moved)break}
   const nodes:GraphNode[]=source.map(entry=>({...entry,...positions.get(entry.id)!,core:coreIds.has(entry.id)}));
   return {nodes,edges};
 }

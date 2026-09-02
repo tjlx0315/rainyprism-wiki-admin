@@ -9022,6 +9022,15 @@ function initRelationNetwork(){
       }
     );
 
+  let completedNetworkPositions = false;
+  nodes.forEach(node =>{
+    if(!db.settings.networkPositions[node.id]){
+      db.settings.networkPositions[node.id] = {x:node.x,y:node.y};
+      completedNetworkPositions = true;
+    }
+  });
+  if(completedNetworkPositions){ saveDB(); }
+
 
   const edges = layoutEdges;
 
