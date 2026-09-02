@@ -213,7 +213,10 @@ function buildPublicGraph(data:WikiData,relations:Relation[]):{nodes:GraphNode[]
     const minX=Math.min(...savedLayout.map(point=>point.x)),maxX=Math.max(...savedLayout.map(point=>point.x));
     const minY=Math.min(...savedLayout.map(point=>point.y)),maxY=Math.max(...savedLayout.map(point=>point.y));
     const width=Math.max(1,maxX-minX),height=Math.max(1,maxY-minY);
-    const scale=Math.min(840/width,720/height);
+    // The canvas world is displayed at the default 135% zoom. Account for
+    // that here so a saved editor layout is fitted only once, not enlarged twice.
+    const defaultViewScale=1.35;
+    const scale=Math.min(880/(width*defaultViewScale),780/(height*defaultViewScale));
     const offsetX=500-(minX+maxX)/2*scale,offsetY=440-(minY+maxY)/2*scale;
     savedLayout.forEach(point=>positions.set(point.id,{x:point.x*scale+offsetX,y:point.y*scale+offsetY,angle:0,core:coreIds.has(point.id)}));
   }
