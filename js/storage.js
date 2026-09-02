@@ -1,6 +1,59 @@
 "use strict";
 
 const STORAGE_KEY = "yulengjing_world_wiki_v1";
+const INDEXED_DB_NAME = "yulengjing_world_wiki";
+const INDEXED_DB_STORE = "world_data";
+const INDEXED_DB_KEY = "main";
+
+
+function openWorldIndexedDB(){
+  return new Promise((resolve,reject) => {
+    if(!window.indexedDB){
+      reject(new Error("当前浏览器不支持 IndexedDB"));
+      return;
+    }
+    const request = indexedDB.open(INDEXED_DB_NAME,1);
+    request.onupgradeneeded = () => {
+      const database = request.result;
+      if(!database.objectStoreNames.contains(INDEXED_DB_STORE)){
+        database.createObjectStore(INDEXED_DB_STORE);
+      }
+    };
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error || new Error("无法打开 IndexedDB"));
+  });
+}
+
+
+async function readIndexedDB(){
+  const database = await openWorldIndexedDB();
+  try{
+    return await new Promise((resolve,reject) => {
+      const transaction = database.transaction(INDEXED_DB_STORE,"readonly");
+      const request = transaction.objectStore(INDEXED_DB_STORE).get(INDEXED_DB_KEY);
+      request.onsuccess = () => resolve(request.result || null);
+      request.onerror = () => reject(request.error || new Error("读取 IndexedDB 失败"));
+    });
+  }finally{
+    database.close();
+  }
+}
+
+
+async function writeIndexedDB(value){
+  const database = await openWorldIndexedDB();
+  try{
+    await new Promise((resolve,reject) => {
+      const transaction = database.transaction(INDEXED_DB_STORE,"readwrite");
+      transaction.objectStore(INDEXED_DB_STORE).put(value,INDEXED_DB_KEY);
+      transaction.oncomplete = () => resolve();
+      transaction.onerror = () => reject(transaction.error || new Error("写入 IndexedDB 失败"));
+      transaction.onabort = () => reject(transaction.error || new Error("IndexedDB 写入已取消"));
+    });
+  }finally{
+    database.close();
+  }
+}
 
 /* =========================================================
    04. 数据库
@@ -32,7 +85,7 @@ function blankDB(){
 }
 
 
-function loadDB(){
+function loadLegacyDB(){
 
   try{
 
@@ -93,6 +146,27 @@ function loadDB(){
 
 }
 
+
+async function loadDB(){
+  try{
+    const indexed = await readIndexedDB();
+    if(indexed && Array.isArray(indexed.cards)){
+      return normalizeImportedDB(indexed);
+    }
+  }catch(error){
+    console.warn("IndexedDB 暂时不可用，将读取旧存储",error);
+  }
+
+  const legacy = loadLegacyDB();
+  try{
+    await writeIndexedDB(legacy);
+    window.__worldStorageMigrated = true;
+  }catch(error){
+    console.error("迁移到 IndexedDB 失败",error);
+  }
+  return legacy;
+}
+
 function normalizeNetworkViewport(viewport){
   const value = viewport && typeof viewport === "object" ? viewport : {};
   const x = Number(value.x);
@@ -106,7 +180,7 @@ function normalizeNetworkViewport(viewport){
 }
 
 
-function saveDB(){
+function saveLegacyDB(){
 
   try{
 
@@ -152,6 +226,29 @@ function saveDB(){
 
   }
 
+}
+
+
+function saveDB(){
+  const snapshot = typeof structuredClone === "function"
+    ? structuredClone(db)
+    : JSON.parse(JSON.stringify(db));
+
+  const previousSave = window.__worldSaveQueue || Promise.resolve();
+  window.__worldSaveQueue = previousSave
+    .catch(() => undefined)
+    .then(() => writeIndexedDB(snapshot));
+
+  window.__lastWorldSave = window.__worldSaveQueue
+    .then(() => {
+      window.__storageQuotaBlocked = false;
+    })
+    .catch(error => {
+      console.error("IndexedDB 保存失败，将尝试旧存储",error);
+      saveLegacyDB();
+    });
+
+  return window.__lastWorldSave;
 }
 
 

@@ -1,6 +1,14 @@
 # 雨棱镜｜世界观百科后台
 
-一个用于整理原创角色（OC）世界观资料的本地编辑器。目前使用原生 HTML、CSS 和 JavaScript 开发，数据保存在浏览器的 `localStorage` 中。
+## 在线入口
+
+- 访客百科：`https://tjlx0315.github.io/rainyprism-wiki-admin/`
+- 百科数据管理：`https://tjlx0315.github.io/rainyprism-wiki-admin/?manage=1`
+- 世界观编辑后台：`https://tjlx0315.github.io/rainyprism-wiki-admin/editor/`
+
+编辑后台的数据只保存在当前浏览器中，不会随网页发布到 GitHub。首次改用线上后台时，请导入此前导出的完整 JSON 备份，并继续定期导出备份。
+
+一个用于整理原创角色（OC）世界观资料的编辑器。目前使用原生 HTML、CSS 和 JavaScript 开发，数据保存在当前浏览器的 IndexedDB 中。
 
 ## 当前功能
 

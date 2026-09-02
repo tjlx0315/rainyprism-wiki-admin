@@ -242,7 +242,7 @@ const NODE_COLORS = {
    02. 运行状态
 ========================================================= */
 
-let db = loadDB();
+let db = blankDB();
 
 let currentView = "cards";
 
@@ -4138,6 +4138,10 @@ function relationsForCard(cardId){
   return db.relations.filter(
     relation =>
       relation.fromCardId === cardId
+      || (
+        relation.undirected !== false
+        && relation.toCardId === cardId
+      )
   );
 
 }
@@ -4178,9 +4182,17 @@ function renderRelationModule(module){
               .map(
                 relation =>{
 
+                  const isOutgoing =
+                    relation.fromCardId === currentCardId;
+
+                  const relatedCardId =
+                    isOutgoing
+                    ? relation.toCardId
+                    : relation.fromCardId;
+
                   const target =
                     getCard(
-                      relation.toCardId
+                      relatedCardId
                     );
 
                   return `
@@ -4191,7 +4203,7 @@ function renderRelationModule(module){
 
                         <button
                           class="relation-name-btn"
-                          data-open-related-card="${relation.toCardId}"
+                          data-open-related-card="${relatedCardId}"
                         >
                           ${
                             escapeHTML(
@@ -11027,13 +11039,25 @@ function migrateLegacyCardTypes(){
    63. 初始化
 ========================================================= */
 
-migrateLegacyCardTypes();
+async function startApplication(){
+  try{
+    db = await loadDB();
+  }catch(error){
+    console.error("初始化世界观数据失败",error);
+    db = blankDB();
+    alert("读取本地资料失败，请使用此前导出的 JSON 备份恢复数据。");
+  }
 
-renderTypeFilter();
+  migrateLegacyCardTypes();
+  renderTypeFilter();
+  refreshGlobalSelectors();
+  document.querySelector(".inner").classList.add("card-workspace-mode");
+  document.querySelector(".content").classList.add("card-workspace-content");
+  renderCardList();
 
-refreshGlobalSelectors();
+  if(window.__worldStorageMigrated){
+    toast("本地资料已升级到大容量存储");
+  }
+}
 
-document.querySelector(".inner").classList.add("card-workspace-mode");
-document.querySelector(".content").classList.add("card-workspace-content");
-
-renderCardList();
+startApplication();
