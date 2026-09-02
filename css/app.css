@@ -1604,20 +1604,22 @@ label{
 .drawer{
   position:absolute;
 
-  top:0;
-  right:0;
-  bottom:0;
+  top:50%;
+  left:50%;
 
-  width:min(480px,92vw);
+  width:min(760px,92vw);
+  max-height:88vh;
 
-  padding:20px;
+  padding:24px;
 
   overflow:auto;
 
-  border-left:1px solid var(--line);
+  border:1px solid var(--line);
+  border-radius:13px;
 
   background:#fff;
-  box-shadow:-12px 0 30px rgba(49,77,94,.10);
+  box-shadow:0 22px 58px rgba(34,53,65,.20);
+  transform:translate(-50%,-50%);
 }
 
 .drawer-head{
@@ -1641,6 +1643,27 @@ label{
   gap:8px;
 
   margin-top:18px;
+}
+
+.mini-editor-toolbar{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  margin:6px 0 8px;
+  padding:7px;
+  border:1px solid var(--line);
+  border-bottom:0;
+  border-radius:8px 8px 0 0;
+  background:#f7fafb;
+}
+
+.mini-editor-toolbar .btn,
+.mini-editor-toolbar select{
+  min-height:34px;
+}
+
+.mini-editor-toolbar + textarea{
+  border-radius:0 0 8px 8px;
 }
 
 

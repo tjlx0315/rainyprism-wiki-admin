@@ -3581,9 +3581,17 @@ function renderGenericModule(module){
             const value = item[field.key] || "";
 
             if(field.type === "textarea"){
+              const editorKey = `${module.id}|${item.id}|${field.key}`;
               return `
                 <div class="field full">
                   <label>${escapeHTML(field.label)}</label>
+                  <div class="mini-editor-toolbar">
+                    <button class="btn small" type="button" data-inline-editor-bold="${editorKey}"><strong>B</strong> 加粗</button>
+                    <select data-inline-editor-card="${editorKey}" aria-label="插入卡片引用">
+                      <option value="">＠ 卡片</option>
+                      ${cardOptions("",false)}
+                    </select>
+                  </div>
                   <textarea data-module-item="${module.id}|${item.id}|${field.key}">${escapeHTML(value)}</textarea>
                 </div>
               `;
@@ -5329,6 +5337,35 @@ function bindModuleEvents(){
       }
     );
 
+  function inlineEditorFor(key){
+    return Array.from(container.querySelectorAll("textarea[data-module-item]"))
+      .find(textarea => textarea.dataset.moduleItem === key);
+  }
+
+  container.querySelectorAll("[data-inline-editor-bold]").forEach(button =>{
+    button.onclick = ()=>{
+      const editor = inlineEditorFor(button.dataset.inlineEditorBold);
+      if(!editor){ return; }
+      const start = editor.selectionStart;
+      const end = editor.selectionEnd;
+      editor.setRangeText(`**${editor.value.slice(start,end) || "加粗文字"}**`,start,end,"select");
+      editor.dispatchEvent(new Event("input",{bubbles:true}));
+      editor.focus();
+    };
+  });
+
+  container.querySelectorAll("[data-inline-editor-card]").forEach(select =>{
+    select.onchange = ()=>{
+      const editor = inlineEditorFor(select.dataset.inlineEditorCard);
+      const linkedCard = getCard(select.value);
+      if(!editor || !linkedCard){ return; }
+      editor.setRangeText(`[[card:${linkedCard.id}|${linkedCard.name || "未命名卡片"}]]`,editor.selectionStart,editor.selectionEnd,"end");
+      editor.dispatchEvent(new Event("input",{bubbles:true}));
+      editor.focus();
+      select.value = "";
+    };
+  });
+
 
   container
     .querySelectorAll(
@@ -6752,6 +6789,14 @@ function openTimelineNodeDrawer(
         内容
       </label>
 
+      <div class="mini-editor-toolbar">
+        <button id="timelineContentBold" class="btn small" type="button"><strong>B</strong> 加粗</button>
+        <select id="timelineContentCardReference" aria-label="插入卡片引用">
+          <option value="">＠ 卡片</option>
+          ${cardOptions("",false)}
+        </select>
+      </div>
+
       <textarea
         id="timelineNodeContent"
         style="min-height:170px"
@@ -6879,6 +6924,26 @@ function openTimelineNodeDrawer(
     </div>
 
   `);
+
+  const contentEditor = document.getElementById("timelineNodeContent");
+  document.getElementById("timelineContentBold").onclick = ()=>{
+    const start = contentEditor.selectionStart;
+    const end = contentEditor.selectionEnd;
+    const selected = contentEditor.value.slice(start,end);
+    const replacement = `**${selected || "加粗文字"}**`;
+    contentEditor.setRangeText(replacement,start,end,"select");
+    contentEditor.focus();
+  };
+  document.getElementById("timelineContentCardReference").onchange = event =>{
+    const id = event.target.value;
+    const linkedCard = getCard(id);
+    if(!linkedCard){ return; }
+    const start = contentEditor.selectionStart;
+    const token = `[[card:${linkedCard.id}|${linkedCard.name || "未命名卡片"}]]`;
+    contentEditor.setRangeText(token,start,contentEditor.selectionEnd,"end");
+    contentEditor.focus();
+    event.target.value = "";
+  };
 
 
   node.relatedCardIds =

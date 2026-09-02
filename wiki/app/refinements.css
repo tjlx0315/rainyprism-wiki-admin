@@ -14,15 +14,29 @@
   padding-bottom: 20px;
 }
 
-.article-title .share {
-  flex: 0 0 auto;
-  margin-top: 31px;
-}
-
 .article-title h1 { margin-bottom: 6px; }
 .article-section { margin-top: 24px; }
-.article-section > p { white-space: pre-line; }
+.article-paragraphs > p { white-space: pre-line; }
 .infobox { background: #f8fbfc; }
+
+.article-record-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 24px;
+}
+
+.article-record {
+  min-height: 58px;
+  padding: 12px 2px;
+  border-bottom: 1px solid #dce4e8;
+  color: #465a65;
+}
+
+.record-main { font-size: 13px; line-height: 1.65; }
+.record-meta { margin-top: 4px; color: #748690; font-size: 11px; line-height: 1.55; }
+.article-section-timeline .record-main { color: #385d70; font-weight: 600; }
+.article-section-timeline .article-record { min-height: 52px; padding-block: 9px; }
+.article-section-timeline time { display: block; margin-bottom: 3px; color: #78909d; font: 11px/1.4 Georgia, serif; }
 
 .info-cover {
   height: 230px;
@@ -142,6 +156,16 @@
 .wiki-importer { background: #f5f9fb; }
 .wiki-importer .import-collapse { background: transparent; }
 .wiki-importer .import-help { width: 100%; color: #617582; line-height: 1.55; }
+
+/* Desktop timeline: keep several events visible in one viewport. */
+.tool-page > .timeline { padding: 30px 4%; }
+.tool-page > .timeline .timeline-line { top: 30px; bottom: 30px; }
+.tool-page > .timeline article { min-height: 108px; }
+.tool-page > .timeline time { font-size: 17px; padding-right: 14px; }
+.tool-page > .timeline article > div { padding: 0 0 20px 24px; }
+.tool-page > .timeline h2 { margin: 5px 0; font-size: 17px; line-height: 1.45; }
+.tool-page > .timeline p { margin: 5px 0; font-size: 11px; line-height: 1.6; }
+.tool-page > .timeline button { margin-top: 4px; }
 
 @media (max-width: 950px) {
   .article-layout {
