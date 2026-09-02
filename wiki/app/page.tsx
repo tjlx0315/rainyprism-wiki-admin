@@ -10,6 +10,55 @@ type NetworkData = { positions?:Record<string,{x:number;y:number}>; primaryIds?:
 type WikiData = { format:string; version:number; exportedAt?:string; entries:Entry[]; relations?:Relation[]; timeline?:TimelineItem[]; network?:NetworkData };
 
 const STORAGE_KEY = 'yulengjing_public_wiki_v1';
+const INDEXED_DB_NAME = 'yulengjing_public_wiki';
+const INDEXED_DB_STORE = 'wiki_data';
+const INDEXED_DB_KEY = 'preview';
+
+function openWikiDB():Promise<IDBDatabase>{
+  return new Promise((resolve,reject)=>{
+    const request=indexedDB.open(INDEXED_DB_NAME,1);
+    request.onupgradeneeded=()=>{if(!request.result.objectStoreNames.contains(INDEXED_DB_STORE))request.result.createObjectStore(INDEXED_DB_STORE)};
+    request.onsuccess=()=>resolve(request.result);
+    request.onerror=()=>reject(request.error||new Error('无法打开浏览器大容量储存'));
+  });
+}
+
+async function readManagedWikiData():Promise<WikiData|null>{
+  const database=await openWikiDB();
+  try{
+    return await new Promise((resolve,reject)=>{
+      const request=database.transaction(INDEXED_DB_STORE,'readonly').objectStore(INDEXED_DB_STORE).get(INDEXED_DB_KEY);
+      request.onsuccess=()=>resolve(request.result?validateData(request.result):null);
+      request.onerror=()=>reject(request.error||new Error('读取预览数据失败'));
+    });
+  }finally{database.close()}
+}
+
+async function writeManagedWikiData(value:WikiData):Promise<void>{
+  const database=await openWikiDB();
+  try{
+    await new Promise<void>((resolve,reject)=>{
+      const transaction=database.transaction(INDEXED_DB_STORE,'readwrite');
+      transaction.objectStore(INDEXED_DB_STORE).put(value,INDEXED_DB_KEY);
+      transaction.oncomplete=()=>resolve();
+      transaction.onerror=()=>reject(transaction.error||new Error('保存预览数据失败'));
+      transaction.onabort=()=>reject(transaction.error||new Error('保存预览数据已取消'));
+    });
+  }finally{database.close()}
+}
+
+async function clearManagedWikiData():Promise<void>{
+  const database=await openWikiDB();
+  try{
+    await new Promise<void>((resolve,reject)=>{
+      const transaction=database.transaction(INDEXED_DB_STORE,'readwrite');
+      transaction.objectStore(INDEXED_DB_STORE).delete(INDEXED_DB_KEY);
+      transaction.oncomplete=()=>resolve();
+      transaction.onerror=()=>reject(transaction.error||new Error('清除预览数据失败'));
+    });
+  }finally{database.close()}
+  localStorage.removeItem(STORAGE_KEY);
+}
 
 function validateData(value:unknown):WikiData {
   const data=value as WikiData;
@@ -28,14 +77,28 @@ export default function Home(){
   const [menu,setMenu]=useState(false);
 
   useEffect(()=>{
-    const saved=localStorage.getItem(STORAGE_KEY);
-    if(saved){
-      try{setData(validateData(JSON.parse(saved)));return}catch{localStorage.removeItem(STORAGE_KEY)}
-    }
-    fetch(`${process.env.NEXT_PUBLIC_BASE_PATH || ''}/wiki-data.json`,{cache:'no-store'})
-      .then(response=>response.ok?response.json():null)
-      .then(value=>{if(value)setData(validateData(value))})
-      .catch(()=>undefined);
+    let active=true;
+    const load=async()=>{
+      try{
+        const indexed=await readManagedWikiData();
+        if(indexed){if(active)setData(indexed);return}
+        const saved=localStorage.getItem(STORAGE_KEY);
+        if(saved){
+          const legacy=validateData(JSON.parse(saved));
+          await writeManagedWikiData(legacy);
+          localStorage.removeItem(STORAGE_KEY);
+          if(active)setData(legacy);
+          return;
+        }
+      }catch{localStorage.removeItem(STORAGE_KEY)}
+      try{
+        const response=await fetch(`${process.env.NEXT_PUBLIC_BASE_PATH || ''}/wiki-data.json`,{cache:'no-store'});
+        const value=response.ok?await response.json():null;
+        if(value&&active)setData(validateData(value));
+      }catch{}
+    };
+    load();
+    return()=>{active=false};
   },[]);
 
   const entries=data?.entries||[];
@@ -71,10 +134,10 @@ function LocalImporter({data,onData}:{data:WikiData|null;onData:(data:WikiData|n
   const [message,setMessage]=useState('');
   useEffect(()=>{setVisible(new URLSearchParams(location.search).get('manage')==='1')},[]);
   if(!visible)return null;
-  const importFile=async(file?:File)=>{if(!file)return;try{const value=validateData(JSON.parse(await file.text()));localStorage.setItem(STORAGE_KEY,JSON.stringify(value));onData(value);setMessage(`导入成功：${value.entries.length} 个词条`) }catch(error){setMessage(`导入失败：${error instanceof Error?error.message:'文件错误'}`)}};
+  const importFile=async(file?:File)=>{if(!file)return;try{const value=validateData(JSON.parse(await file.text()));await writeManagedWikiData(value);localStorage.removeItem(STORAGE_KEY);onData(value);setMessage(`导入成功：${value.entries.length} 个词条`) }catch(error){setMessage(`导入失败：${error instanceof Error?error.message:'文件错误'}`)}};
   const downloadData=()=>{if(!data)return;const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const link=document.createElement('a');link.href=url;link.download='wiki-data.json';link.click();URL.revokeObjectURL(url);setMessage('已下载 wiki-data.json；用 GitHub Desktop 发布后，所有访客都会看到这份资料')};
   if(!expanded)return <button className="wiki-import-toggle" onClick={()=>setExpanded(true)}>管理数据</button>;
-  return <aside className="wiki-importer"><div><b>百科数据管理</b><span>导入只影响当前浏览器；不会让访客修改公开网站</span></div><label className="import-button">选择百科 JSON<input type="file" accept="application/json,.json" onChange={event=>importFile(event.target.files?.[0])}/></label>{data&&<button onClick={downloadData}>下载公开数据</button>}{data&&<button onClick={()=>{localStorage.removeItem(STORAGE_KEY);onData(null);setMessage('已清除本机预览数据')}}>清除预览</button>}<button className="import-collapse" onClick={()=>setExpanded(false)}>收起</button>{message&&<p>{message}</p>}<small className="import-help">预览确认后，将 wiki-data.json 放入仓库的 wiki/public 文件夹，再用 GitHub Desktop 推送，即可更新所有访客看到的内容。</small></aside>;
+  return <aside className="wiki-importer"><div><b>百科数据管理</b><span>导入只影响当前浏览器；不会让访客修改公开网站</span></div><label className="import-button">选择百科 JSON<input type="file" accept="application/json,.json" onChange={event=>importFile(event.target.files?.[0])}/></label>{data&&<button onClick={downloadData}>下载公开数据</button>}{data&&<button onClick={async()=>{try{await clearManagedWikiData();onData(null);setMessage('已清除本机预览数据')}catch(error){setMessage(`清除失败：${error instanceof Error?error.message:'浏览器储存错误'}`)}}}>清除预览</button>}<button className="import-collapse" onClick={()=>setExpanded(false)}>收起</button>{message&&<p>{message}</p>}<small className="import-help">预览确认后，将 wiki-data.json 放入仓库的 wiki/public 文件夹，再用 GitHub Desktop 推送，即可更新所有访客看到的内容。</small></aside>;
 }
 
 function WikiHome({data,openEntry,openCategory,nav}:{data:WikiData|null;openEntry:(id:string)=>void;openCategory:(type:string)=>void;nav:(view:View)=>void}){
