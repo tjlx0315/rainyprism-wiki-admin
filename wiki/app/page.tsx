@@ -48,7 +48,7 @@ export default function Home(){
   return <div className="site-shell">
     <LocalImporter data={data} onData={value=>{setData(value);setView('home');setEntryId('')}} />
     <header className="topbar">
-      <button className="brand" onClick={()=>nav('home')}><span className="brand-prism">◇</span><span><b>雨棱镜</b><small>世界观百科</small></span></button>
+      <button className="brand" onClick={()=>nav('home')}><span className="brand-wordmark" aria-hidden="true"/><span><b>雨棱镜</b><small>世界观百科</small></span></button>
       <div className="search-wrap"><span>⌕</span><input value={query} onChange={event=>setQuery(event.target.value)} placeholder="搜索人物、地点、事件…" aria-label="搜索百科"/>{query&&<div className="search-results">{results.length?results.map(item=><button key={item.id} onClick={()=>{openEntry(item.id);setQuery('')}}>{item.name}<small>{item.subtype||item.type}</small></button>):<p>暂无匹配词条</p>}</div>}</div>
       <button className="menu-button" onClick={()=>setMenu(!menu)}>☰</button>
       <nav className={menu?'main-nav open':'main-nav'}><button className={view==='home'||view==='article'?'active':''} onClick={()=>nav('home')}>百科</button><button className={view==='timeline'?'active':''} onClick={()=>nav('timeline')}>时间轴</button><button className={view==='relations'?'active':''} onClick={()=>nav('relations')}>关系网</button><button className={view==='map'?'active':''} onClick={()=>nav('map')}>地图</button></nav>

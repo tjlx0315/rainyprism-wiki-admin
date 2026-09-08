@@ -164,3 +164,161 @@
   .network-view-buttons input[type="range"] { width: 70px; }
   .public-network-stage { min-height: 430px; }
 }
+
+/* Rainy Prism — public encyclopedia light theme */
+.site-shell {
+  --ink: #17203a;
+  --muted: #68738b;
+  --line: rgba(42, 55, 102, .18);
+  --paper: #e8eef7;
+  --blue: #2a3766;
+  --dark: #2a3766;
+  --soft: #dce5f2;
+  --surface: rgba(250, 252, 255, .68);
+  --surface-strong: rgba(252, 253, 255, .86);
+  min-height: 100vh;
+  color: var(--ink);
+  background:
+    radial-gradient(circle at 14% 5%, rgba(255,255,255,.92), transparent 30%),
+    linear-gradient(145deg, #edf2f9 0%, #e1e9f4 54%, #d9e3f0 100%);
+  transition: color 240ms ease, background-color 240ms ease;
+}
+
+.site-shell[data-theme="dark"] {
+  --ink: #eef3fb;
+  --muted: #a8b4cb;
+  --line: rgba(200, 216, 244, .17);
+  --paper: #0b1427;
+  --blue: #b9c9ee;
+  --dark: #08101f;
+  --soft: #182640;
+  --surface: rgba(20, 32, 54, .72);
+  --surface-strong: rgba(25, 39, 64, .88);
+  background:
+    radial-gradient(circle at 78% 8%, rgba(65,82,128,.34), transparent 31%),
+    linear-gradient(145deg, #0b1325 0%, #111d34 56%, #091222 100%);
+}
+
+.site-shell button, .site-shell input { font-family: inherit; }
+.site-shell, .site-shell .brand b, .site-shell .wiki-welcome h1,
+.site-shell .tool-heading h1, .site-shell .article-title h1,
+.site-shell .panel-title, .site-shell .infobox h2, .site-shell .wiki-index h2,
+.site-shell .category-link b { font-family: "Songti SC", "STSong", "SimSun", serif; }
+
+.site-shell .topbar {
+  background: rgba(233, 239, 248, .76);
+  border-color: rgba(255,255,255,.72);
+  box-shadow: 0 12px 36px rgba(42,55,102,.10), inset 0 -1px rgba(42,55,102,.08);
+  backdrop-filter: blur(20px) saturate(125%);
+  -webkit-backdrop-filter: blur(20px) saturate(125%);
+}
+
+.brand-wordmark {
+  width: 96px;
+  height: 25px;
+  flex: 0 0 auto;
+  color: var(--ink);
+  background: currentColor;
+  -webkit-mask: url('/logo-header.png') center / contain no-repeat;
+  mask: url('/logo-header.png') center / contain no-repeat;
+}
+
+.site-shell[data-theme="dark"] .topbar {
+  background: rgba(12, 22, 40, .76);
+  border-color: rgba(211,225,250,.13);
+  box-shadow: 0 14px 42px rgba(0,0,0,.25), inset 0 -1px rgba(220,230,250,.08);
+}
+
+.site-shell[data-theme="dark"] .brand-prism { color: #c7d4f1; }
+
+.site-shell .search-wrap, .site-shell .search-results,
+.site-shell .wiki-welcome, .site-shell .wiki-panel, .site-shell .wiki-index,
+.site-shell .infobox, .site-shell .relation-network-list,
+.site-shell .public-network, .site-shell .timeline, .site-shell .network {
+  background: var(--surface);
+  border-color: var(--line);
+  box-shadow: 0 16px 46px rgba(42,55,102,.07);
+  backdrop-filter: blur(14px) saturate(115%);
+  -webkit-backdrop-filter: blur(14px) saturate(115%);
+}
+
+.site-shell[data-theme="dark"] .search-wrap,
+.site-shell[data-theme="dark"] .search-results,
+.site-shell[data-theme="dark"] .wiki-welcome,
+.site-shell[data-theme="dark"] .wiki-panel,
+.site-shell[data-theme="dark"] .wiki-index,
+.site-shell[data-theme="dark"] .infobox,
+.site-shell[data-theme="dark"] .relation-network-list,
+.site-shell[data-theme="dark"] .public-network,
+.site-shell[data-theme="dark"] .timeline,
+.site-shell[data-theme="dark"] .network { box-shadow: 0 18px 52px rgba(0,0,0,.22); }
+
+.site-shell .panel-title, .site-shell .demo-strip,
+.site-shell .public-network-toolbar {
+  color: var(--ink);
+  background: rgba(42,55,102,.055) !important;
+  border-color: var(--line);
+}
+
+.site-shell[data-theme="dark"] .panel-title,
+.site-shell[data-theme="dark"] .demo-strip,
+.site-shell[data-theme="dark"] .public-network-toolbar {
+  background: rgba(225,234,252,.055) !important;
+}
+
+.site-shell .brand, .site-shell .main-nav button, .site-shell .search-wrap input,
+.site-shell .search-results button, .site-shell .wiki-link, .site-shell .wiki-more,
+.site-shell .portal-links button, .site-shell .wiki-index button,
+.site-shell .category-link, .site-shell .back-link, .site-shell .inline-link,
+.site-shell footer button { color: var(--ink); }
+
+.site-shell .main-nav button.active, .site-shell .wiki-more,
+.site-shell .back-link, .site-shell .inline-link, .site-shell .wiki-link,
+.site-shell .portal-links button, .site-shell .wiki-index button { color: var(--blue); }
+
+.theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-left: 8px;
+  padding-left: 15px !important;
+  border-left: 1px solid var(--line) !important;
+  color: var(--muted) !important;
+  white-space: nowrap;
+}
+.theme-toggle span { font-family: sans-serif; font-size: 16px; line-height: 1; }
+
+.site-shell[data-theme="dark"] p, .site-shell[data-theme="dark"] small,
+.site-shell[data-theme="dark"] .breadcrumb, .site-shell[data-theme="dark"] dt,
+.site-shell[data-theme="dark"] .recent-list b, .site-shell[data-theme="dark"] footer,
+.site-shell[data-theme="dark"] .public-network-toolbar,
+.site-shell[data-theme="dark"] .category-link small { color: var(--muted); }
+
+.site-shell[data-theme="dark"] .category-entry-list button,
+.site-shell[data-theme="dark"] .relation-text-list li,
+.site-shell[data-theme="dark"] .public-network-stage,
+.site-shell[data-theme="dark"] .public-network.readonly .public-network-stage {
+  color: var(--ink);
+  background-color: rgba(8,16,31,.42);
+  border-color: var(--line);
+}
+
+.site-shell[data-theme="dark"] .wiki-import-toggle,
+.site-shell[data-theme="dark"] .wiki-importer {
+  color: var(--ink);
+  background: var(--surface-strong);
+  border-color: var(--line);
+}
+
+.site-shell .main-nav button, .site-shell .theme-toggle,
+.site-shell .category-link, .site-shell .search-results button {
+  transition: color 180ms ease, background-color 180ms ease, border-color 180ms ease, transform 180ms ease;
+}
+
+@media (hover: hover) {
+  .site-shell .category-link:hover, .site-shell .category-entry-list button:hover,
+  .site-shell .search-results button:hover { background: rgba(255,255,255,.36); }
+  .site-shell[data-theme="dark"] .category-link:hover,
+  .site-shell[data-theme="dark"] .category-entry-list button:hover,
+  .site-shell[data-theme="dark"] .search-results button:hover { background: rgba(205,220,248,.08); }
+}

@@ -21,3 +21,15 @@ backups/
 .idea/
 *.swp
 *~
+
+# Local-only worldbuilding editor
+# These files stay on this Mac / external drive and are never published.
+/index.html
+/css/
+/js/
+/安全备份/
+/启动百科前端.command
+/停止百科前端.command
+
+# Local duplicate / working copy; the only published site lives in /wiki.
+/百科前端/
