@@ -10,6 +10,55 @@ type NetworkData = { positions?:Record<string,{x:number;y:number}>; primaryIds?:
 type WikiData = { format:string; version:number; exportedAt?:string; entries:Entry[]; relations?:Relation[]; timeline?:TimelineItem[]; network?:NetworkData };
 
 const STORAGE_KEY = 'yulengjing_public_wiki_v1';
+const INDEXED_DB_NAME = 'yulengjing_public_wiki';
+const INDEXED_DB_STORE = 'wiki_data';
+const INDEXED_DB_KEY = 'preview';
+
+function openWikiDB():Promise<IDBDatabase>{
+  return new Promise((resolve,reject)=>{
+    const request=indexedDB.open(INDEXED_DB_NAME,1);
+    request.onupgradeneeded=()=>{if(!request.result.objectStoreNames.contains(INDEXED_DB_STORE))request.result.createObjectStore(INDEXED_DB_STORE)};
+    request.onsuccess=()=>resolve(request.result);
+    request.onerror=()=>reject(request.error||new Error('无法打开浏览器大容量储存'));
+  });
+}
+
+async function readManagedWikiData():Promise<WikiData|null>{
+  const database=await openWikiDB();
+  try{
+    return await new Promise((resolve,reject)=>{
+      const request=database.transaction(INDEXED_DB_STORE,'readonly').objectStore(INDEXED_DB_STORE).get(INDEXED_DB_KEY);
+      request.onsuccess=()=>resolve(request.result?validateData(request.result):null);
+      request.onerror=()=>reject(request.error||new Error('读取预览数据失败'));
+    });
+  }finally{database.close()}
+}
+
+async function writeManagedWikiData(value:WikiData):Promise<void>{
+  const database=await openWikiDB();
+  try{
+    await new Promise<void>((resolve,reject)=>{
+      const transaction=database.transaction(INDEXED_DB_STORE,'readwrite');
+      transaction.objectStore(INDEXED_DB_STORE).put(value,INDEXED_DB_KEY);
+      transaction.oncomplete=()=>resolve();
+      transaction.onerror=()=>reject(transaction.error||new Error('保存预览数据失败'));
+      transaction.onabort=()=>reject(transaction.error||new Error('保存预览数据已取消'));
+    });
+  }finally{database.close()}
+}
+
+async function clearManagedWikiData():Promise<void>{
+  const database=await openWikiDB();
+  try{
+    await new Promise<void>((resolve,reject)=>{
+      const transaction=database.transaction(INDEXED_DB_STORE,'readwrite');
+      transaction.objectStore(INDEXED_DB_STORE).delete(INDEXED_DB_KEY);
+      transaction.oncomplete=()=>resolve();
+      transaction.onerror=()=>reject(transaction.error||new Error('清除预览数据失败'));
+    });
+  }finally{database.close()}
+  localStorage.removeItem(STORAGE_KEY);
+}
 
 function validateData(value:unknown):WikiData {
   const data=value as WikiData;
@@ -28,14 +77,28 @@ export default function Home(){
   const [menu,setMenu]=useState(false);
 
   useEffect(()=>{
-    const saved=localStorage.getItem(STORAGE_KEY);
-    if(saved){
-      try{setData(validateData(JSON.parse(saved)));return}catch{localStorage.removeItem(STORAGE_KEY)}
-    }
-    fetch(`${process.env.NEXT_PUBLIC_BASE_PATH || ''}/wiki-data.json`,{cache:'no-store'})
-      .then(response=>response.ok?response.json():null)
-      .then(value=>{if(value)setData(validateData(value))})
-      .catch(()=>undefined);
+    let active=true;
+    const load=async()=>{
+      try{
+        const indexed=await readManagedWikiData();
+        if(indexed){if(active)setData(indexed);return}
+        const saved=localStorage.getItem(STORAGE_KEY);
+        if(saved){
+          const legacy=validateData(JSON.parse(saved));
+          await writeManagedWikiData(legacy);
+          localStorage.removeItem(STORAGE_KEY);
+          if(active)setData(legacy);
+          return;
+        }
+      }catch{localStorage.removeItem(STORAGE_KEY)}
+      try{
+        const response=await fetch(`${process.env.NEXT_PUBLIC_BASE_PATH || ''}/wiki-data.json`,{cache:'no-store'});
+        const value=response.ok?await response.json():null;
+        if(value&&active)setData(validateData(value));
+      }catch{}
+    };
+    load();
+    return()=>{active=false};
   },[]);
 
   const entries=data?.entries||[];
@@ -71,10 +134,10 @@ function LocalImporter({data,onData}:{data:WikiData|null;onData:(data:WikiData|n
   const [message,setMessage]=useState('');
   useEffect(()=>{setVisible(new URLSearchParams(location.search).get('manage')==='1')},[]);
   if(!visible)return null;
-  const importFile=async(file?:File)=>{if(!file)return;try{const value=validateData(JSON.parse(await file.text()));localStorage.setItem(STORAGE_KEY,JSON.stringify(value));onData(value);setMessage(`导入成功：${value.entries.length} 个词条`) }catch(error){setMessage(`导入失败：${error instanceof Error?error.message:'文件错误'}`)}};
+  const importFile=async(file?:File)=>{if(!file)return;try{const value=validateData(JSON.parse(await file.text()));await writeManagedWikiData(value);localStorage.removeItem(STORAGE_KEY);onData(value);setMessage(`导入成功：${value.entries.length} 个词条`) }catch(error){setMessage(`导入失败：${error instanceof Error?error.message:'文件错误'}`)}};
   const downloadData=()=>{if(!data)return;const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const link=document.createElement('a');link.href=url;link.download='wiki-data.json';link.click();URL.revokeObjectURL(url);setMessage('已下载 wiki-data.json；用 GitHub Desktop 发布后，所有访客都会看到这份资料')};
   if(!expanded)return <button className="wiki-import-toggle" onClick={()=>setExpanded(true)}>管理数据</button>;
-  return <aside className="wiki-importer"><div><b>百科数据管理</b><span>导入只影响当前浏览器；不会让访客修改公开网站</span></div><label className="import-button">选择百科 JSON<input type="file" accept="application/json,.json" onChange={event=>importFile(event.target.files?.[0])}/></label>{data&&<button onClick={downloadData}>下载公开数据</button>}{data&&<button onClick={()=>{localStorage.removeItem(STORAGE_KEY);onData(null);setMessage('已清除本机预览数据')}}>清除预览</button>}<button className="import-collapse" onClick={()=>setExpanded(false)}>收起</button>{message&&<p>{message}</p>}<small className="import-help">预览确认后，将 wiki-data.json 放入仓库的 wiki/public 文件夹，再用 GitHub Desktop 推送，即可更新所有访客看到的内容。</small></aside>;
+  return <aside className="wiki-importer"><div><b>百科数据管理</b><span>导入只影响当前浏览器；不会让访客修改公开网站</span></div><label className="import-button">选择百科 JSON<input type="file" accept="application/json,.json" onChange={event=>importFile(event.target.files?.[0])}/></label>{data&&<button onClick={downloadData}>下载公开数据</button>}{data&&<button onClick={async()=>{try{await clearManagedWikiData();onData(null);setMessage('已清除本机预览数据')}catch(error){setMessage(`清除失败：${error instanceof Error?error.message:'浏览器储存错误'}`)}}}>清除预览</button>}<button className="import-collapse" onClick={()=>setExpanded(false)}>收起</button>{message&&<p>{message}</p>}<small className="import-help">预览确认后，将 wiki-data.json 放入仓库的 wiki/public 文件夹，再用 GitHub Desktop 推送，即可更新所有访客看到的内容。</small></aside>;
 }
 
 function WikiHome({data,openEntry,openCategory,nav}:{data:WikiData|null;openEntry:(id:string)=>void;openCategory:(type:string)=>void;nav:(view:View)=>void}){
@@ -89,9 +152,14 @@ function CategoryPage({data,type,openEntry,back}:{data:WikiData|null;type:string
 
 function Panel({title,children}:{title:string;children:React.ReactNode}){return <section className="wiki-panel gray"><h1 className="panel-title">{title}</h1><div className="panel-body">{children}</div></section>}
 
-function Article({entry,openEntry}:{entry:Entry;openEntry:(id:string)=>void}){const sections=(entry.sections||[]).filter(section=>section.title&&section.paragraphs?.length);return <main className="article-layout"><aside className="toc"><b>目录</b><a href="#intro">简介</a>{sections.map(section=><a key={section.title} href={`#${section.title}`}>{section.title}</a>)}</aside><article className="article"><div className="breadcrumb"><span>百科</span><span>/</span><span>{entry.type}</span><span>/</span><b>{entry.name}</b></div><header className="article-title" id="intro"><div><span className="demo-mark">{entry.subtype||entry.type}</span><h1>{entry.name}</h1>{entry.subtitle&&<p>{entry.subtitle}</p>}</div><button className="share" onClick={()=>navigator.clipboard?.writeText(location.href)}>复制链接</button></header>{entry.summary&&<p className="lead">{entry.summary}</p>}{sections.map((section,index)=><section key={section.title} id={section.title} className="article-section"><div className="article-heading"><span>{String(index+1).padStart(2,'0')}</span><h2>{section.title}</h2></div>{section.paragraphs.map((text,i)=><p key={i}><MentionText text={text} openEntry={openEntry}/></p>)}</section>)}</article><aside className="infobox"><div className="info-cover">{entry.image?<img src={entry.image} alt={`${entry.name}代表图`}/>:<><span>◇</span><small>RAIN PRISM ARCHIVE</small></>}</div><h2>{entry.name}</h2>{entry.subtitle&&<p>{entry.subtitle}</p>}<dl>{(entry.facts||[]).map(([key,value])=><div key={`${key}-${value}`}><dt>{key}</dt><dd>{value}</dd></div>)}</dl>{!(entry.facts||[]).length&&<small className="source-note">暂无公开基础资料</small>}</aside></main>}
+function Article({entry,openEntry}:{entry:Entry;openEntry:(id:string)=>void}){const sections=(entry.sections||[]).filter(section=>section.title&&section.paragraphs?.length);return <main className="article-layout"><aside className="toc"><b>目录</b><a href="#intro">简介</a>{sections.map(section=><a key={section.title} href={`#${section.title}`}>{section.title}</a>)}</aside><article className="article"><div className="breadcrumb"><span>百科</span><span>/</span><span>{entry.type}</span><span>/</span><b>{entry.name}</b></div><header className="article-title" id="intro"><div><span className="demo-mark">{entry.subtype||entry.type}</span><h1>{entry.name}</h1>{entry.subtitle&&<p>{entry.subtitle}</p>}</div></header>{entry.summary&&<p className="lead">{entry.summary}</p>}{sections.map((section,index)=><ArticleSection key={section.title} section={section} index={index} openEntry={openEntry}/>)}</article><aside className="infobox"><div className="info-cover">{entry.image?<img src={entry.image} alt={`${entry.name}代表图`}/>:<><span>◇</span><small>RAIN PRISM ARCHIVE</small></>}</div><h2>{entry.name}</h2>{entry.subtitle&&<p>{entry.subtitle}</p>}<dl>{(entry.facts||[]).map(([key,value])=><div key={`${key}-${value}`}><dt>{key}</dt><dd>{value}</dd></div>)}</dl>{!(entry.facts||[]).length&&<small className="source-note">暂无公开基础资料</small>}</aside></main>}
 
-function MentionText({text,openEntry}:{text:string;openEntry:(id:string)=>void}){const pattern=/\[\[card:([^|\]]+)\|([^\]]+)\]\]/g;const parts:React.ReactNode[]=[];let last=0;let match:RegExpExecArray|null;while((match=pattern.exec(text))){if(match.index>last)parts.push(text.slice(last,match.index));const id=match[1];const name=match[2];parts.push(<button key={`${id}-${match.index}`} className="inline-link" onClick={()=>openEntry(id)}>{name}</button>);last=pattern.lastIndex}if(last<text.length)parts.push(text.slice(last));return <>{parts}</>}
+function ArticleSection({section,index,openEntry}:{section:{title:string;paragraphs:string[]};index:number;openEntry:(id:string)=>void}){
+  const kind=section.title.includes('时间轴')?'timeline':section.title.includes('职务')?'jobs':'default';
+  return <section id={section.title} className={`article-section article-section-${kind}`}><div className="article-heading"><span>{String(index+1).padStart(2,'0')}</span><h2>{section.title}</h2></div><div className={kind==='default'?'article-paragraphs':'article-record-grid'}>{section.paragraphs.map((text,i)=>{const lines=text.split('\n').filter(Boolean);if(kind==='default')return <p key={i}><MentionText text={text} openEntry={openEntry}/></p>;if(kind==='timeline'){const date=lines.find(line=>/^(日期|时间)：/.test(line))||'';const title=lines.find(line=>/^标题：/.test(line))||lines.find(line=>line!==date)||'';const details=lines.filter(line=>line!==date&&line!==title);return <article className="article-record" key={i}>{date&&<time>{date.replace(/^(日期|时间)：\s*/,'')}</time>}<div className="record-main"><MentionText text={title.replace(/^标题：\s*/,'')} openEntry={openEntry}/></div>{details.map((line,lineIndex)=><div className="record-meta" key={lineIndex}><MentionText text={line} openEntry={openEntry}/></div>)}</article>}return <article className="article-record" key={i}>{lines.map((line,lineIndex)=><div className={lineIndex===0?'record-main':'record-meta'} key={lineIndex}><MentionText text={line} openEntry={openEntry}/></div>)}</article>})}</div></section>
+}
+
+function MentionText({text,openEntry}:{text:string;openEntry:(id:string)=>void}){const styled=(value:string,key:string)=>value.split(/(\*\*[^*]+\*\*)/g).filter(Boolean).map((part,index)=>part.startsWith('**')&&part.endsWith('**')?<strong key={`${key}-bold-${index}`}>{part.slice(2,-2)}</strong>:part);const pattern=/\[\[card:([^|\]]+)\|([^\]]+)\]\]/g;const parts:React.ReactNode[]=[];let last=0;let match:RegExpExecArray|null;while((match=pattern.exec(text))){if(match.index>last)parts.push(...styled(text.slice(last,match.index),`text-${last}`));const id=match[1];const name=match[2];parts.push(<button key={`${id}-${match.index}`} className="inline-link" onClick={()=>openEntry(id)}>{name}</button>);last=pattern.lastIndex}if(last<text.length)parts.push(...styled(text.slice(last),`text-${last}`));return <>{parts}</>}
 
 function Relations({data,openEntry}:{data:WikiData|null;openEntry:(id:string)=>void}){const [mode,setMode]=useState<'network'|'list'>('network');const relations=(data?.relations||[]).filter(item=>{const from=data?.entries.find(entry=>entry.id===item.fromId);const to=data?.entries.find(entry=>entry.id===item.toId);return from?.type==='角色'&&to?.type==='角色'});if(!relations.length)return <Empty title="关系网暂无内容" text="在编辑器中为角色建立关系并重新导出后，这里会自动显示。"/>;return <main className="tool-page relations-page"><div className="tool-heading relation-heading"><div><h1>人物关系</h1><p>以下关系来自编辑器公开数据。</p></div><div className="relation-tabs"><button className={mode==='network'?'active':''} onClick={()=>setMode('network')}>关系网</button><button className={mode==='list'?'active':''} onClick={()=>setMode('list')}>关系列表</button></div></div>{mode==='network'?<PublicRelationGraph data={data!} relations={relations} openEntry={openEntry}/>:<section className="wiki-panel gray"><div className="panel-body"><ul className="relation-text-list">{relations.map(item=><li key={item.id}><button onClick={()=>openEntry(item.fromId)}>{item.fromName}</button><b>{item.label}</b><button onClick={()=>openEntry(item.toId)}>{item.toName}</button>{item.note&&<small>{item.note}</small>}</li>)}</ul></div></section>}</main>}
 
@@ -102,7 +170,7 @@ function PublicRelationGraph({data,relations,openEntry}:{data:WikiData;relations
   const canvasRef=useRef<HTMLCanvasElement>(null);
   const stageRef=useRef<HTMLDivElement>(null);
   const movedRef=useRef(false);
-  const [view,setView]=useState({x:0,y:0,scale:1.35});
+  const [view,setView]=useState({x:0,y:0,scale:1});
   const [drag,setDrag]=useState<{x:number;y:number;originX:number;originY:number}|null>(null);
   const graph=useMemo(()=>buildPublicGraph(data,relations),[data,relations]);
   useEffect(()=>{
@@ -118,7 +186,7 @@ function PublicRelationGraph({data,relations,openEntry}:{data:WikiData;relations
   const point=(event:React.MouseEvent<HTMLCanvasElement>)=>{const rect=event.currentTarget.getBoundingClientRect();return{x:(event.clientX-rect.left)*1000/rect.width,y:(event.clientY-rect.top)*900/rect.height}};
   const hit=(x:number,y:number)=>graph.nodes.find(node=>Math.hypot(node.x-x,node.y-y)<=30);
   const zoom=(next:number)=>setView(current=>({...current,scale:Math.max(.45,Math.min(1.8,next))}));
-  return <section className="public-network readonly"><div className="public-network-toolbar"><strong>人物关系</strong><span>滚轮缩放 · 按住拖动画布 · 点击人物打开词条</span><div className="network-view-buttons"><button onClick={()=>zoom(view.scale-.1)} aria-label="缩小百分之十">−</button><input type="range" min="45" max="180" step="5" value={Math.round(view.scale*100)} onChange={event=>zoom(Number(event.target.value)/100)} aria-label="关系网缩放比例"/><output>{Math.round(view.scale*100)}%</output><button onClick={()=>zoom(view.scale+.1)} aria-label="放大百分之十">＋</button><button onClick={()=>setView({x:0,y:0,scale:1.35})}>重置</button></div></div><div ref={stageRef} className="public-network-stage" onPointerDown={event=>{event.currentTarget.setPointerCapture(event.pointerId);movedRef.current=false;setDrag({x:event.clientX,y:event.clientY,originX:view.x,originY:view.y})}} onPointerMove={event=>{if(!drag)return;const dx=event.clientX-drag.x,dy=event.clientY-drag.y;if(Math.hypot(dx,dy)>3)movedRef.current=true;setView(current=>({...current,x:drag.originX+dx,y:drag.originY+dy}))}} onPointerUp={()=>setDrag(null)} onPointerCancel={()=>setDrag(null)}><div className="public-network-canvas-world" style={{transform:`translate(-50%,-50%) translate(${view.x}px,${view.y}px) scale(${view.scale})`}}><canvas ref={canvasRef} aria-label="人物关系网" onClick={event=>{if(movedRef.current){movedRef.current=false;return}const p=point(event),node=hit(p.x,p.y);if(node)openEntry(node.id)}} onMouseMove={event=>{if(drag){event.currentTarget.style.cursor='grabbing';return}const p=point(event);event.currentTarget.style.cursor=hit(p.x,p.y)?'pointer':'grab'}}/></div></div></section>
+  return <section className="public-network readonly"><div className="public-network-toolbar"><strong>人物关系</strong><span>滚轮缩放 · 按住拖动画布 · 双击人物打开词条</span><div className="network-view-buttons"><button onClick={()=>zoom(view.scale-.1)} aria-label="缩小百分之十">−</button><input type="range" min="45" max="180" step="5" value={Math.round(view.scale*100)} onChange={event=>zoom(Number(event.target.value)/100)} aria-label="关系网缩放比例"/><output>{Math.round(view.scale*100)}%</output><button onClick={()=>zoom(view.scale+.1)} aria-label="放大百分之十">＋</button><button onClick={()=>setView({x:0,y:0,scale:1})}>重置</button></div></div><div ref={stageRef} className="public-network-stage" onPointerDown={event=>{event.currentTarget.setPointerCapture(event.pointerId);movedRef.current=false;setDrag({x:event.clientX,y:event.clientY,originX:view.x,originY:view.y})}} onPointerMove={event=>{if(!drag)return;const dx=event.clientX-drag.x,dy=event.clientY-drag.y;if(Math.hypot(dx,dy)>3)movedRef.current=true;setView(current=>({...current,x:drag.originX+dx,y:drag.originY+dy}))}} onPointerUp={()=>setDrag(null)} onPointerCancel={()=>setDrag(null)}><div className="public-network-canvas-world" style={{transform:`translate(-50%,-50%) translate(${view.x}px,${view.y}px) scale(${view.scale})`}}><canvas ref={canvasRef} aria-label="人物关系网" onDoubleClick={event=>{if(movedRef.current){movedRef.current=false;return}const p=point(event),node=hit(p.x,p.y);if(node)openEntry(node.id)}} onMouseMove={event=>{if(drag){event.currentTarget.style.cursor='grabbing';return}const p=point(event);event.currentTarget.style.cursor=hit(p.x,p.y)?'pointer':'grab'}}/></div></div></section>
 }
 
 function buildPublicGraph(data:WikiData,relations:Relation[]):{nodes:GraphNode[];edges:GraphEdge[]}{
@@ -144,8 +212,21 @@ function buildPublicGraph(data:WikiData,relations:Relation[]):{nodes:GraphNode[]
   for(let pass=0;pass<5;pass++)source.forEach(entry=>{if(positions.has(entry.id))return;const parentId=(adjacency.get(entry.id)||[]).find(id=>positions.has(id));if(!parentId)return;const parent=positions.get(parentId)!;const count=childCounts.get(parentId)||0;childCounts.set(parentId,count+1);const baseAngle=Math.atan2(parent.y-center.y,parent.x-center.x),angle=baseAngle+(count%2?1:-1)*Math.ceil(count/2)*.2;positions.set(entry.id,{...clamp({x:parent.x+Math.cos(angle)*96,y:parent.y+Math.sin(angle)*96}),angle})});
   const remaining=source.filter(entry=>!positions.has(entry.id));
   remaining.forEach((entry,index)=>{const angle=-Math.PI/2+index*Math.PI*2/Math.max(remaining.length,1);positions.set(entry.id,{...clamp({x:center.x+Math.cos(angle)*387,y:center.y+Math.sin(angle)*387}),angle})});
+  const savedLayout=source.flatMap(entry=>{const point=data.network?.positions?.[entry.id];return point&&Number.isFinite(point.x)&&Number.isFinite(point.y)?[{id:entry.id,x:point.x,y:point.y}]:[]});
+  const usesSavedLayout=savedLayout.length>=2&&savedLayout.length===source.length;
+  if(usesSavedLayout){
+    const minX=Math.min(...savedLayout.map(point=>point.x)),maxX=Math.max(...savedLayout.map(point=>point.x));
+    const minY=Math.min(...savedLayout.map(point=>point.y)),maxY=Math.max(...savedLayout.map(point=>point.y));
+    const width=Math.max(1,maxX-minX),height=Math.max(1,maxY-minY);
+    // The canvas world is displayed at the default 135% zoom. Account for
+    // that here so a saved editor layout is fitted only once, not enlarged twice.
+    const defaultViewScale=1;
+    const scale=Math.min(880/(width*defaultViewScale),780/(height*defaultViewScale));
+    const offsetX=500-(minX+maxX)/2*scale,offsetY=440-(minY+maxY)/2*scale;
+    savedLayout.forEach(point=>positions.set(point.id,{x:point.x*scale+offsetX,y:point.y*scale+offsetY,angle:0,core:coreIds.has(point.id)}));
+  }
   const positionedIds=source.map(entry=>entry.id);
-  for(let pass=0;pass<80;pass++){let moved=false;for(let i=0;i<positionedIds.length;i++)for(let j=i+1;j<positionedIds.length;j++){const a=positions.get(positionedIds[i])!,b=positions.get(positionedIds[j])!;let dx=b.x-a.x,dy=b.y-a.y,distance=Math.hypot(dx,dy);if(distance>=82)continue;if(distance<.01){const angle=(i*2.399963+j*.73)%(Math.PI*2);dx=Math.cos(angle);dy=Math.sin(angle);distance=1}const push=(82-distance)/2+.6,ux=dx/distance,uy=dy/distance;if(!a.core&&!b.core){a.x-=ux*push;a.y-=uy*push;b.x+=ux*push;b.y+=uy*push}else if(a.core&&!b.core){b.x+=ux*push*2;b.y+=uy*push*2}else if(!a.core&&b.core){a.x-=ux*push*2;a.y-=uy*push*2}if(!a.core)Object.assign(a,clamp(a));if(!b.core)Object.assign(b,clamp(b));moved=true}if(!moved)break}
+  if(!usesSavedLayout)for(let pass=0;pass<80;pass++){let moved=false;for(let i=0;i<positionedIds.length;i++)for(let j=i+1;j<positionedIds.length;j++){const a=positions.get(positionedIds[i])!,b=positions.get(positionedIds[j])!;let dx=b.x-a.x,dy=b.y-a.y,distance=Math.hypot(dx,dy);if(distance>=82)continue;if(distance<.01){const angle=(i*2.399963+j*.73)%(Math.PI*2);dx=Math.cos(angle);dy=Math.sin(angle);distance=1}const push=(82-distance)/2+.6,ux=dx/distance,uy=dy/distance;if(!a.core&&!b.core){a.x-=ux*push;a.y-=uy*push;b.x+=ux*push;b.y+=uy*push}else if(a.core&&!b.core){b.x+=ux*push*2;b.y+=uy*push*2}else if(!a.core&&b.core){a.x-=ux*push*2;a.y-=uy*push*2}if(!a.core)Object.assign(a,clamp(a));if(!b.core)Object.assign(b,clamp(b));moved=true}if(!moved)break}
   const nodes:GraphNode[]=source.map(entry=>({...entry,...positions.get(entry.id)!,core:coreIds.has(entry.id)}));
   return {nodes,edges};
 }
