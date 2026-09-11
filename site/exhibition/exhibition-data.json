@@ -1,0 +1,664 @@
+{
+  "version": 1,
+  "site": {
+    "title": "展览",
+    "eyebrow": "02｜EXHIBITION ARCHIVE",
+    "statement": "We look.\nWe connect.\nWe feel alive."
+  },
+  "roles": [
+    "陆黎",
+    "魏舒桐",
+    "顾遥洲",
+    "姜徕",
+    "林典",
+    "顾南风"
+  ],
+  "series": [
+    {
+      "id": "series-mtvbqzqt-11de0",
+      "title": "河流",
+      "year": "2026",
+      "description": "",
+      "creditLabel": "备注",
+      "credit": "",
+      "roles": [
+        "陆黎",
+        "魏舒桐",
+        "顾遥洲",
+        "姜徕",
+        "林典",
+        "顾南风"
+      ],
+      "coverId": "image-mtvbqzqt-k3qpw",
+      "relatedMerchId": "",
+      "works": [
+        {
+          "id": "image-mtvbqzqt-k3qpw",
+          "title": "陆黎",
+          "image": "exhibition-media/1-9d382454.png",
+          "alt": "陆黎的系列作品",
+          "roles": [
+            "陆黎"
+          ],
+          "ratio": "1 / 1",
+          "span": 4,
+          "angle": "132deg",
+          "x": "28%",
+          "y": "22%"
+        },
+        {
+          "id": "image-mtvbqzqt-ccfk9",
+          "title": "魏舒桐",
+          "image": "exhibition-media/2-24e6b714.png",
+          "alt": "魏舒桐的系列作品",
+          "roles": [
+            "魏舒桐"
+          ],
+          "ratio": "1 / 1",
+          "span": 4,
+          "angle": "149deg",
+          "x": "43%",
+          "y": "38%"
+        },
+        {
+          "id": "image-mtvbqzqt-g5lj0",
+          "title": "顾遥洲",
+          "image": "exhibition-media/3-06cf9f0e.png",
+          "alt": "顾遥洲的系列作品",
+          "roles": [
+            "顾遥洲"
+          ],
+          "ratio": "1 / 1",
+          "span": 4,
+          "angle": "166deg",
+          "x": "58%",
+          "y": "22%"
+        },
+        {
+          "id": "image-mtvbqzqt-75b8y",
+          "title": "姜徕",
+          "image": "exhibition-media/4-6b8d0400.png",
+          "alt": "姜徕的系列作品",
+          "roles": [
+            "姜徕"
+          ],
+          "ratio": "1 / 1",
+          "span": 4,
+          "angle": "183deg",
+          "x": "28%",
+          "y": "38%"
+        },
+        {
+          "id": "image-mtvbqzqt-5a0sd",
+          "title": "林典",
+          "image": "exhibition-media/5-e7d59f6a.png",
+          "alt": "林典的系列作品",
+          "roles": [
+            "林典"
+          ],
+          "ratio": "1 / 1",
+          "span": 4,
+          "angle": "200deg",
+          "x": "43%",
+          "y": "22%"
+        },
+        {
+          "id": "image-mtvbqzqt-30n2r",
+          "title": "顾南风",
+          "image": "exhibition-media/6-2f575a48.png",
+          "alt": "顾南风的系列作品",
+          "roles": [
+            "顾南风"
+          ],
+          "ratio": "1 / 1",
+          "span": 4,
+          "angle": "217deg",
+          "x": "58%",
+          "y": "38%"
+        }
+      ]
+    },
+    {
+      "id": "series-mtvir07q-cl20c",
+      "title": "花语",
+      "year": "2026",
+      "description": "点击这里输入系列说明。",
+      "creditLabel": "备注",
+      "credit": "",
+      "roles": [
+        "陆黎",
+        "魏舒桐",
+        "顾遥洲",
+        "姜徕",
+        "林典",
+        "顾南风"
+      ],
+      "coverId": "image-mtvir07q-iwagx",
+      "relatedMerchId": "",
+      "works": [
+        {
+          "id": "image-mtvir07p-781k9",
+          "title": "陆黎",
+          "image": "exhibition-media/1-ec321d5c.png",
+          "alt": "陆黎的系列作品",
+          "roles": [
+            "陆黎"
+          ],
+          "ratio": "1 / 1",
+          "span": 4,
+          "angle": "132deg",
+          "x": "28%",
+          "y": "22%"
+        },
+        {
+          "id": "image-mtvir07q-iwagx",
+          "title": "魏舒桐",
+          "image": "exhibition-media/2-9fe9d55d.png",
+          "alt": "魏舒桐的系列作品",
+          "roles": [
+            "魏舒桐"
+          ],
+          "ratio": "1 / 1",
+          "span": 4,
+          "angle": "149deg",
+          "x": "43%",
+          "y": "38%"
+        },
+        {
+          "id": "image-mtvir07q-4k39a",
+          "title": "顾遥洲",
+          "image": "exhibition-media/3-8e4af3d9.png",
+          "alt": "顾遥洲的系列作品",
+          "roles": [
+            "顾遥洲"
+          ],
+          "ratio": "1 / 1",
+          "span": 4,
+          "angle": "166deg",
+          "x": "58%",
+          "y": "22%"
+        },
+        {
+          "id": "image-mtvir07q-9i3fr",
+          "title": "姜徕",
+          "image": "exhibition-media/4-5bc67964.png",
+          "alt": "姜徕的系列作品",
+          "roles": [
+            "姜徕"
+          ],
+          "ratio": "1 / 1",
+          "span": 4,
+          "angle": "183deg",
+          "x": "28%",
+          "y": "38%"
+        },
+        {
+          "id": "image-mtvir07q-8phz7",
+          "title": "林典",
+          "image": "exhibition-media/5-508e81aa.png",
+          "alt": "林典的系列作品",
+          "roles": [
+            "林典"
+          ],
+          "ratio": "1 / 1",
+          "span": 4,
+          "angle": "200deg",
+          "x": "43%",
+          "y": "22%"
+        },
+        {
+          "id": "image-mtvir07q-ebb7f",
+          "title": "顾南风",
+          "image": "exhibition-media/6-d28f70b0.png",
+          "alt": "顾南风的系列作品",
+          "roles": [
+            "顾南风"
+          ],
+          "ratio": "1 / 1",
+          "span": 4,
+          "angle": "217deg",
+          "x": "58%",
+          "y": "38%"
+        }
+      ]
+    },
+    {
+      "id": "series-mtvbslbh-0y8x2",
+      "title": "明光",
+      "year": "2026",
+      "description": "点击这里输入系列说明。",
+      "creditLabel": "备注",
+      "credit": "",
+      "roles": [
+        "陆黎",
+        "魏舒桐",
+        "顾遥洲",
+        "姜徕",
+        "林典",
+        "顾南风"
+      ],
+      "coverId": "image-mtvbslbh-u5gj1",
+      "relatedMerchId": "",
+      "works": [
+        {
+          "id": "image-mtvbslbh-2y3vj",
+          "title": "陆黎",
+          "image": "exhibition-media/1-702c58c8.png",
+          "alt": "陆黎的系列作品",
+          "roles": [
+            "陆黎"
+          ],
+          "ratio": "1 / 1",
+          "span": 4,
+          "angle": "132deg",
+          "x": "28%",
+          "y": "22%"
+        },
+        {
+          "id": "image-mtvbslbh-zr5w9",
+          "title": "魏舒桐",
+          "image": "exhibition-media/2-a6d03be9.png",
+          "alt": "魏舒桐的系列作品",
+          "roles": [
+            "魏舒桐"
+          ],
+          "ratio": "1 / 1",
+          "span": 4,
+          "angle": "149deg",
+          "x": "43%",
+          "y": "38%"
+        },
+        {
+          "id": "image-mtvbslbh-u5gj1",
+          "title": "顾遥洲",
+          "image": "exhibition-media/3-d5eac331.png",
+          "alt": "顾遥洲的系列作品",
+          "roles": [
+            "顾遥洲"
+          ],
+          "ratio": "1 / 1",
+          "span": 4,
+          "angle": "166deg",
+          "x": "58%",
+          "y": "22%"
+        },
+        {
+          "id": "image-mtvbslbh-n7et9",
+          "title": "姜徕",
+          "image": "exhibition-media/4-fabce55d.png",
+          "alt": "姜徕的系列作品",
+          "roles": [
+            "姜徕"
+          ],
+          "ratio": "1 / 1",
+          "span": 4,
+          "angle": "183deg",
+          "x": "28%",
+          "y": "38%"
+        },
+        {
+          "id": "image-mtvbslbh-tujx5",
+          "title": "林典",
+          "image": "exhibition-media/5-e0290087.png",
+          "alt": "林典的系列作品",
+          "roles": [
+            "林典"
+          ],
+          "ratio": "1 / 1",
+          "span": 4,
+          "angle": "200deg",
+          "x": "43%",
+          "y": "22%"
+        },
+        {
+          "id": "image-mtvbslbh-19u9k",
+          "title": "顾南风",
+          "image": "exhibition-media/6-cb83d21f.png",
+          "alt": "顾南风的系列作品",
+          "roles": [
+            "顾南风"
+          ],
+          "ratio": "1 / 1",
+          "span": 4,
+          "angle": "217deg",
+          "x": "58%",
+          "y": "38%"
+        }
+      ]
+    },
+    {
+      "id": "series-mtvipsk9-62rsh",
+      "title": "命运",
+      "year": "2026",
+      "description": "点击这里输入系列说明。",
+      "creditLabel": "备注",
+      "credit": "",
+      "roles": [
+        "陆黎",
+        "魏舒桐",
+        "顾遥洲",
+        "姜徕",
+        "林典",
+        "顾南风"
+      ],
+      "coverId": "image-mtvipsk9-pngk5",
+      "relatedMerchId": "",
+      "works": [
+        {
+          "id": "image-mtvipsk8-e9wtg",
+          "title": "陆黎",
+          "image": "exhibition-media/Image_1769068398837_565-1ffad186.png",
+          "alt": "陆黎的系列作品",
+          "roles": [
+            "陆黎"
+          ],
+          "ratio": "1 / 1",
+          "span": 4,
+          "angle": "132deg",
+          "x": "28%",
+          "y": "22%"
+        },
+        {
+          "id": "image-mtvipsk9-j2vr3",
+          "title": "魏舒桐",
+          "image": "exhibition-media/2-82b9275b.png",
+          "alt": "魏舒桐的系列作品",
+          "roles": [
+            "魏舒桐"
+          ],
+          "ratio": "1 / 1",
+          "span": 4,
+          "angle": "149deg",
+          "x": "43%",
+          "y": "38%"
+        },
+        {
+          "id": "image-mtvipsk9-vjymn",
+          "title": "顾遥洲",
+          "image": "exhibition-media/3-6ddca8e7.png",
+          "alt": "顾遥洲的系列作品",
+          "roles": [
+            "顾遥洲"
+          ],
+          "ratio": "1 / 1",
+          "span": 4,
+          "angle": "166deg",
+          "x": "58%",
+          "y": "22%"
+        },
+        {
+          "id": "image-mtvipsk9-pngk5",
+          "title": "姜徕",
+          "image": "exhibition-media/4-40e7fde3.png",
+          "alt": "姜徕的系列作品",
+          "roles": [
+            "姜徕"
+          ],
+          "ratio": "1 / 1",
+          "span": 4,
+          "angle": "183deg",
+          "x": "28%",
+          "y": "38%"
+        },
+        {
+          "id": "image-mtvipsk9-wwxar",
+          "title": "林典",
+          "image": "exhibition-media/5-f90d6242.png",
+          "alt": "林典的系列作品",
+          "roles": [
+            "林典"
+          ],
+          "ratio": "1 / 1",
+          "span": 4,
+          "angle": "200deg",
+          "x": "43%",
+          "y": "22%"
+        },
+        {
+          "id": "image-mtvipsk9-pt2wi",
+          "title": "顾南风",
+          "image": "exhibition-media/6-cc00261f.png",
+          "alt": "顾南风的系列作品",
+          "roles": [
+            "顾南风"
+          ],
+          "ratio": "1 / 1",
+          "span": 4,
+          "angle": "217deg",
+          "x": "58%",
+          "y": "38%"
+        }
+      ]
+    },
+    {
+      "id": "series-mtviqf5k-knsf0",
+      "title": "清晨",
+      "year": "2026",
+      "description": "点击这里输入系列说明。",
+      "creditLabel": "备注",
+      "credit": "",
+      "roles": [
+        "陆黎",
+        "魏舒桐",
+        "顾遥洲",
+        "姜徕",
+        "林典",
+        "顾南风"
+      ],
+      "coverId": "image-mtviqf5k-vo9r9",
+      "relatedMerchId": "",
+      "works": [
+        {
+          "id": "image-mtviqf5k-e7y8s",
+          "title": "陆黎",
+          "image": "exhibition-media/1-2c8cdec2.png",
+          "alt": "陆黎的系列作品",
+          "roles": [
+            "陆黎"
+          ],
+          "ratio": "1 / 1",
+          "span": 4,
+          "angle": "132deg",
+          "x": "28%",
+          "y": "22%"
+        },
+        {
+          "id": "image-mtviqf5k-nreyd",
+          "title": "魏舒桐",
+          "image": "exhibition-media/2-8475b80c.png",
+          "alt": "魏舒桐的系列作品",
+          "roles": [
+            "魏舒桐"
+          ],
+          "ratio": "1 / 1",
+          "span": 4,
+          "angle": "149deg",
+          "x": "43%",
+          "y": "38%"
+        },
+        {
+          "id": "image-mtviqf5k-ftu1n",
+          "title": "顾遥洲",
+          "image": "exhibition-media/3-4f342cad.png",
+          "alt": "顾遥洲的系列作品",
+          "roles": [
+            "顾遥洲"
+          ],
+          "ratio": "1 / 1",
+          "span": 4,
+          "angle": "166deg",
+          "x": "58%",
+          "y": "22%"
+        },
+        {
+          "id": "image-mtviqf5k-t67rg",
+          "title": "姜徕",
+          "image": "exhibition-media/4-b5769805.png",
+          "alt": "姜徕的系列作品",
+          "roles": [
+            "姜徕"
+          ],
+          "ratio": "1 / 1",
+          "span": 4,
+          "angle": "183deg",
+          "x": "28%",
+          "y": "38%"
+        },
+        {
+          "id": "image-mtviqf5k-vo9r9",
+          "title": "林典",
+          "image": "exhibition-media/5-5ebfce0e.png",
+          "alt": "林典的系列作品",
+          "roles": [
+            "林典"
+          ],
+          "ratio": "1 / 1",
+          "span": 4,
+          "angle": "200deg",
+          "x": "43%",
+          "y": "22%"
+        },
+        {
+          "id": "image-mtviqf5k-lw90r",
+          "title": "顾南风",
+          "image": "exhibition-media/6-9ffef711.png",
+          "alt": "顾南风的系列作品",
+          "roles": [
+            "顾南风"
+          ],
+          "ratio": "1 / 1",
+          "span": 4,
+          "angle": "217deg",
+          "x": "58%",
+          "y": "38%"
+        }
+      ]
+    },
+    {
+      "id": "series-mtvip1ac-uz9ma",
+      "title": "雏鸟",
+      "year": "2026",
+      "description": "点击这里输入系列说明。",
+      "creditLabel": "备注",
+      "credit": "",
+      "roles": [
+        "陆黎",
+        "魏舒桐",
+        "顾遥洲",
+        "姜徕",
+        "林典",
+        "顾南风"
+      ],
+      "coverId": "image-mtvip1ac-uhhyk",
+      "relatedMerchId": "",
+      "works": [
+        {
+          "id": "image-mtvip1ac-d9t74",
+          "title": "陆黎",
+          "image": "exhibition-media/1-3e6a09ed.png",
+          "alt": "陆黎的系列作品",
+          "roles": [
+            "陆黎"
+          ],
+          "ratio": "1 / 1",
+          "span": 4,
+          "angle": "132deg",
+          "x": "28%",
+          "y": "22%"
+        },
+        {
+          "id": "image-mtvip1ac-dwcms",
+          "title": "魏舒桐",
+          "image": "exhibition-media/2-3484a94b.png",
+          "alt": "魏舒桐的系列作品",
+          "roles": [
+            "魏舒桐"
+          ],
+          "ratio": "1 / 1",
+          "span": 4,
+          "angle": "149deg",
+          "x": "43%",
+          "y": "38%"
+        },
+        {
+          "id": "image-mtvip1ac-kv7s9",
+          "title": "顾遥洲",
+          "image": "exhibition-media/3-dedffc1e.png",
+          "alt": "顾遥洲的系列作品",
+          "roles": [
+            "顾遥洲"
+          ],
+          "ratio": "1 / 1",
+          "span": 4,
+          "angle": "166deg",
+          "x": "58%",
+          "y": "22%"
+        },
+        {
+          "id": "image-mtvip1ac-0cu7a",
+          "title": "姜徕",
+          "image": "exhibition-media/4-71ca8bae.png",
+          "alt": "姜徕的系列作品",
+          "roles": [
+            "姜徕"
+          ],
+          "ratio": "1 / 1",
+          "span": 4,
+          "angle": "183deg",
+          "x": "28%",
+          "y": "38%"
+        },
+        {
+          "id": "image-mtvip1ac-iy3gq",
+          "title": "林典",
+          "image": "exhibition-media/5-13e7fa21.png",
+          "alt": "林典的系列作品",
+          "roles": [
+            "林典"
+          ],
+          "ratio": "1 / 1",
+          "span": 4,
+          "angle": "200deg",
+          "x": "43%",
+          "y": "22%"
+        },
+        {
+          "id": "image-mtvip1ac-uhhyk",
+          "title": "顾南风",
+          "image": "exhibition-media/6-6f8bdad1.png",
+          "alt": "顾南风的系列作品",
+          "roles": [
+            "顾南风"
+          ],
+          "ratio": "1 / 1",
+          "span": 4,
+          "angle": "217deg",
+          "x": "58%",
+          "y": "38%"
+        }
+      ]
+    }
+  ],
+  "merchandise": [
+    {
+      "id": "merch-gaze",
+      "title": "人物与目光｜周边",
+      "description": "从系列原画延伸出的纸品与小型周边。",
+      "relatedSeriesIds": [],
+      "items": [
+        {
+          "id": "merch-gaze-01",
+          "title": "纸品样本",
+          "image": "",
+          "alt": "人物与目光系列周边",
+          "roles": [],
+          "span": 5,
+          "ratio": "4 / 5",
+          "angle": "196deg",
+          "x": "58%",
+          "y": "24%"
+        }
+      ]
+    }
+  ]
+}

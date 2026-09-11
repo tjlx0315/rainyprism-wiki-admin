@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light" />
+    <title>雨棱镜｜展览</title>
+    <link rel="stylesheet" href="exhibition-test.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="wordmark" href="../index.html#exhibition" aria-label="返回雨棱镜首页">
+        <img src="../assets/logo-header.png" alt="Rainy Prism" />
+      </a>
+      <div class="header-actions">
+        <span class="local-badge" id="local-badge" hidden>本地管理</span>
+        <a class="back-link" href="../index.html#exhibition">返回主页 <span>↖</span></a>
+      </div>
+    </header>
+
+    <main>
+      <section class="exhibition-hero">
+        <span class="eyebrow" id="site-eyebrow">02｜EXHIBITION ARCHIVE</span>
+        <div class="hero-row">
+          <h1 id="site-title">展览</h1>
+          <p id="site-statement">We look.<br />We connect.<br />We feel alive.</p>
+        </div>
+        <div class="catalog-tools">
+          <nav class="view-tabs" aria-label="展览浏览方式">
+            <button class="is-active" type="button" data-view="series">系列</button>
+            <button type="button" data-view="roles">角色</button>
+            <button type="button" data-view="merchandise">周边</button>
+          </nav>
+          <label class="search-field">
+            <span>查找系列</span>
+            <input id="series-search" type="search" placeholder="输入系列名称……" autocomplete="off" />
+            <kbd>⌘ K</kbd>
+          </label>
+        </div>
+      </section>
+
+      <section class="archive" aria-live="polite">
+        <div class="archive-meta">
+          <span id="result-label">全部系列</span>
+          <b id="result-count">00</b>
+        </div>
+        <div id="catalog"></div>
+        <div class="empty-state" id="empty-state" hidden>
+          <p>没有找到对应内容。</p>
+          <button type="button" data-action="clear-search">清除查找</button>
+        </div>
+      </section>
+    </main>
+
+    <footer><span>RAINY PRISM</span><span>EXHIBITION ARCHIVE · 2026</span></footer>
+
+    <div class="admin-dock" id="admin-dock" hidden>
+      <div class="admin-status">
+        <span class="status-dot" id="status-dot"></span>
+        <span id="save-status">草稿已保存</span>
+      </div>
+      <div class="admin-actions">
+        <span class="inline-hint">点击文字直接改 · 图片点一下选中，再点一下替换</span>
+        <button type="button" data-action="add-series">＋ 新建系列</button>
+        <button type="button" data-action="add-merch">＋ 新建周边</button>
+        <button type="button" data-action="edit-home-featured">首页展示图</button>
+        <button type="button" data-action="publish-settings">发布设置</button>
+        <button class="primary-action" type="button" data-action="publish">发布访客页</button>
+      </div>
+    </div>
+
+    <div class="drawer-backdrop" id="drawer-backdrop" hidden></div>
+    <aside class="editor-drawer" id="editor-drawer" aria-hidden="true" aria-label="内容编辑器">
+      <header class="drawer-header">
+        <div><span class="drawer-kicker">LOCAL EDITOR</span><h2 id="drawer-title">编辑内容</h2></div>
+        <button class="icon-button" type="button" data-action="close-drawer" aria-label="关闭编辑器">×</button>
+      </header>
+      <form id="editor-form" class="editor-form"></form>
+    </aside>
+
+    <div class="toast-region" id="toast-region" aria-live="polite" aria-atomic="true"></div>
+    <input id="image-input" type="file" accept="image/*" multiple hidden />
+    <script src="exhibition-test.js"></script>
+  </body>
+</html>

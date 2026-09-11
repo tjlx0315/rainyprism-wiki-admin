@@ -1,0 +1,66 @@
+const panels = [...document.querySelectorAll('.panel')];
+const navLinks = [...document.querySelectorAll('nav a')];
+const counter = document.querySelector('.section-count span');
+const spectrum = document.querySelector('.spectrum');
+
+async function loadHomeFeaturedWorks() {
+  const cards = [...document.querySelectorAll('.art-card')];
+  if (!cards.length) return;
+  try {
+    let dataPath = 'exhibition/exhibition-data.json';
+    let response = await fetch(`${dataPath}?v=${Date.now()}`, { cache: 'no-store' });
+    if (!response.ok) {
+      dataPath = 'exhibition-data.json';
+      response = await fetch(`${dataPath}?v=${Date.now()}`, { cache: 'no-store' });
+    }
+    if (!response.ok) return;
+    const data = await response.json();
+    const works = (data.series || []).flatMap((series) => series.works || []).filter((work) => work.image);
+    const byId = new Map(works.map((work) => [work.id, work]));
+    const requested = Array.isArray(data.site?.homeFeaturedWorkIds) ? data.site.homeFeaturedWorkIds : [];
+    const featured = [...new Set([...requested, ...works.map((work) => work.id)])].map((id) => byId.get(id)).filter(Boolean).slice(0, 3);
+    cards.forEach((card, index) => {
+      const work = featured[index];
+      if (!work) return;
+      const imagePrefix = dataPath.startsWith('exhibition/') ? 'exhibition/' : '';
+      card.style.backgroundImage = `url("${imagePrefix}${String(work.image).replaceAll('"', '%22')}")`;
+      card.classList.add('has-artwork');
+      card.setAttribute('aria-label', work.title || `作品 ${index + 1}`);
+    });
+  } catch {}
+}
+
+loadHomeFeaturedWorks();
+
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach((entry) => {
+    if (!entry.isIntersecting) return;
+    const id = entry.target.id;
+    const index = entry.target.dataset.index;
+    counter.textContent = index;
+    navLinks.forEach((link) => {
+      link.classList.toggle('is-active', link.getAttribute('href') === `#${id}`);
+    });
+  });
+}, { threshold: 0.58 });
+
+panels.forEach((panel) => observer.observe(panel));
+
+let pointerFrame = 0;
+let pointerX = innerWidth * .5;
+let pointerY = innerHeight * .5;
+let lastPointerPaint = 0;
+
+window.addEventListener('pointermove', (event) => {
+  pointerX = event.clientX;
+  pointerY = event.clientY;
+  if (pointerFrame) return;
+  pointerFrame = requestAnimationFrame((now) => {
+    if (now - lastPointerPaint >= 30) {
+      spectrum.style.setProperty('--mx', `${(pointerX / innerWidth) * 100}%`);
+      spectrum.style.setProperty('--my', `${(pointerY / innerHeight) * 100}%`);
+      lastPointerPaint = now;
+    }
+    pointerFrame = 0;
+  });
+}, { passive: true });

@@ -1,4 +1,4 @@
-name: Publish wiki frontend
+name: Publish Rainy Prism site
 
 on:
   push:
@@ -8,6 +8,7 @@ on:
       - 'css/**'
       - 'js/**'
       - 'wiki/**'
+      - 'site/**'
       - '.github/workflows/wiki-pages.yml'
   workflow_dispatch:
 
@@ -37,16 +38,16 @@ jobs:
           cache: pnpm
           cache-dependency-path: wiki/pnpm-lock.yaml
       - run: pnpm install --frozen-lockfile
-      - name: Add the private-data-free editor to the site
-        run: |
-          mkdir -p public/editor/css public/editor/js
-          cp ../index.html public/editor/index.html
-          cp ../css/app.css public/editor/css/app.css
-          cp ../js/app.js public/editor/js/app.js
-          cp ../js/storage.js public/editor/js/storage.js
       - run: pnpm exec next build --webpack
         env:
-          NEXT_PUBLIC_BASE_PATH: /rainyprism-wiki-admin
+          NEXT_PUBLIC_BASE_PATH: /rainyprism-wiki-admin/wiki
+      - name: Assemble homepage, exhibition and wiki branches
+        working-directory: .
+        run: |
+          mv wiki/out wiki-built
+          mkdir -p wiki/out
+          mv wiki-built wiki/out/wiki
+          cp -R site/. wiki/out/
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

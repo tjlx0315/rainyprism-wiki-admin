@@ -1,11 +1,11 @@
-# 雨棱镜｜世界观百科
+# 雨棱镜
 
 ## 项目边界
 
-- `wiki/` 是唯一会发布到 GitHub Pages 的公开百科。
-- 普通网址是访客界面，不显示数据管理入口。
-- 同一网址加 `?manage=1` 后才显示“管理数据”，用于导入和检查公开百科 JSON。
-- 根目录的世界观编辑器（`index.html`、`css/`、`js/`）只在本地使用，不纳入 Git 发布。
+- 根网址是雨棱镜主页面。
+- `wiki/` 是百科分支，包含访客页、数据管理模式和编辑后台。
+- `exhibition/` 是展览分支，显示已发布的展览内容。
+- `site/` 保存 GitHub Pages 会发布的主页、展览与百科后台静态文件。
 
 ---
 
@@ -13,9 +13,12 @@
 
 ## 在线入口
 
-- 访客百科：`https://tjlx0315.github.io/rainyprism-wiki-admin/`
-- 百科数据管理：`https://tjlx0315.github.io/rainyprism-wiki-admin/?manage=1`
-- 世界观编辑后台：`https://tjlx0315.github.io/rainyprism-wiki-admin/editor/`
+- 雨棱镜主页：`https://tjlx0315.github.io/rainyprism-wiki-admin/`
+- 开场页：`https://tjlx0315.github.io/rainyprism-wiki-admin/intro.html`
+- 展览访客页：`https://tjlx0315.github.io/rainyprism-wiki-admin/exhibition/`
+- 访客百科：`https://tjlx0315.github.io/rainyprism-wiki-admin/wiki/`
+- 百科数据管理：`https://tjlx0315.github.io/rainyprism-wiki-admin/wiki/?manage=1`
+- 世界观编辑后台：`https://tjlx0315.github.io/rainyprism-wiki-admin/wiki/editor/`
 
 编辑后台的数据只保存在当前浏览器中，不会随网页发布到 GitHub。首次改用线上后台时，请导入此前导出的完整 JSON 备份，并继续定期导出备份。
 
