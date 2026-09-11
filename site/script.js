@@ -18,14 +18,18 @@ async function loadHomeFeaturedWorks() {
     const works = (data.series || []).flatMap((series) => series.works || []).filter((work) => work.image);
     const byId = new Map(works.map((work) => [work.id, work]));
     const requested = Array.isArray(data.site?.homeFeaturedWorkIds) ? data.site.homeFeaturedWorkIds : [];
-    const featured = [...new Set([...requested, ...works.map((work) => work.id)])].map((id) => byId.get(id)).filter(Boolean).slice(0, 3);
+    const featured = [...new Set([...requested, ...works.map((work) => work.id)])].map((id) => byId.get(id)).filter(Boolean).slice(0, 6);
     cards.forEach((card, index) => {
       const work = featured[index];
       if (!work) return;
       const imagePrefix = dataPath.startsWith('exhibition/') ? 'exhibition/' : '';
-      card.style.backgroundImage = `url("${imagePrefix}${String(work.image).replaceAll('"', '%22')}")`;
+      const cover = card.querySelector('.art-card__cover');
+      if (!cover) return;
+      cover.style.backgroundImage = `url("${imagePrefix}${String(work.image).replaceAll('"', '%22')}")`;
       card.classList.add('has-artwork');
       card.setAttribute('aria-label', work.title || `作品 ${index + 1}`);
+      const role = work.roles?.[0];
+      card.setAttribute('href', role ? `exhibition/?view=roles&role=${encodeURIComponent(role)}` : 'exhibition/');
     });
   } catch {}
 }

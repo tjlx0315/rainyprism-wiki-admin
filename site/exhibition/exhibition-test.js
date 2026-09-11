@@ -89,8 +89,10 @@ const els = {
 };
 
 let archiveData = structuredClone(FALLBACK_DATA);
-let currentView = "series";
-let currentRole = "全部角色";
+const queryParams = new URLSearchParams(window.location.search);
+const requestedView = queryParams.get("view");
+let currentView = requestedView === "roles" ? "roles" : "series";
+let currentRole = currentView === "roles" ? queryParams.get("role") || "全部角色" : "全部角色";
 let activeDetail = null;
 let uploadTarget = null;
 let saveTimer = null;
@@ -149,9 +151,9 @@ function normalizeData(input) {
     merch.items = Array.isArray(merch.items) ? merch.items : [];
     merch.items.forEach((item) => normalizeItem(item, merch.title));
   });
-  const workIds = normalized.series.flatMap((series) => series.works.map((work) => work.id));
+  const homeWorkIds = normalized.series.flatMap((series) => series.works).filter((work) => work.image && work.roles.length === 1).map((work) => work.id);
   const selectedIds = Array.isArray(normalized.site.homeFeaturedWorkIds) ? normalized.site.homeFeaturedWorkIds : [];
-  normalized.site.homeFeaturedWorkIds = unique([...selectedIds.filter((id) => workIds.includes(id)), ...workIds]).slice(0, 3);
+  normalized.site.homeFeaturedWorkIds = unique([...selectedIds.filter((id) => homeWorkIds.includes(id)), ...homeWorkIds]).slice(0, 6);
   normalized.roles = unique([
     ...DEFAULT_ROLES,
     ...normalized.roles,
@@ -527,19 +529,20 @@ function allSeriesWorks() {
 }
 
 function editHomeFeatured() {
-  const works = allSeriesWorks().filter((work) => work.image);
+  const works = allSeriesWorks().filter((work) => work.image && work.roles.length === 1);
   const selected = archiveData.site.homeFeaturedWorkIds || [];
-  const slots = selected.map((id, index) => {
+  const slots = Array.from({ length: 6 }, (_, index) => {
+    const id = selected[index] || "";
     const work = works.find((item) => item.id === id);
-    return `<div class="home-featured-slot"><small>展示位 ${String(index + 1).padStart(2, "0")}</small><strong>${escapeHtml(work?.title || "未选择")}</strong><div class="home-featured-order"><button type="button" data-action="move-home-featured" data-id="${escapeHtml(id)}" data-direction="-1" aria-label="向前移动" ${index === 0 ? "disabled" : ""}>←</button><button type="button" data-action="move-home-featured" data-id="${escapeHtml(id)}" data-direction="1" aria-label="向后移动" ${index === selected.length - 1 ? "disabled" : ""}>→</button></div></div>`;
+    return `<div class="home-featured-slot"><small>展示位 ${String(index + 1).padStart(2, "0")}</small><strong>${escapeHtml(work?.title || "未选择")}</strong>${work ? `<small>点击进入：${escapeHtml(work.roles[0])}</small>` : ""}<div class="home-featured-order"><button type="button" data-action="move-home-featured" data-id="${escapeHtml(id)}" data-direction="-1" aria-label="向前移动" ${!id || index === 0 ? "disabled" : ""}>←</button><button type="button" data-action="move-home-featured" data-id="${escapeHtml(id)}" data-direction="1" aria-label="向后移动" ${!id || index === selected.length - 1 ? "disabled" : ""}>→</button></div></div>`;
   }).join("");
   openDrawer("首页展示图", `
-    <p class="config-state">按 01、02、03 的顺序展示在首页。点击图片可选中或取消；同一张图不会重复出现。</p>
+    <p class="config-state">按 01 至 06 的顺序展示在首页。点击图片可选中或取消；只有关联了一个角色的作品可以入选，点击首页图片会进入对应角色。</p>
     <div class="home-featured-slots">${slots}</div>
     <div class="cover-choice-grid">
       ${works.map((work) => {
         const index = selected.indexOf(work.id);
-        return `<button class="cover-choice home-featured-choice ${index >= 0 ? "is-current" : ""}" type="button" data-action="toggle-home-featured" data-id="${escapeHtml(work.id)}"><span class="cover-choice-image">${artwork(work)}</span><span>${escapeHtml(work.title)}</span><small>${escapeHtml(work.seriesTitle)}</small>${index >= 0 ? `<b class="home-featured-choice-index">${index + 1}</b>` : ""}</button>`;
+        return `<button class="cover-choice home-featured-choice ${index >= 0 ? "is-current" : ""}" type="button" data-action="toggle-home-featured" data-id="${escapeHtml(work.id)}"><span class="cover-choice-image">${artwork(work)}</span><span>${escapeHtml(work.title)}</span><small>${escapeHtml(work.seriesTitle)} · ${escapeHtml(work.roles[0])}</small>${index >= 0 ? `<b class="home-featured-choice-index">${index + 1}</b>` : ""}</button>`;
       }).join("") || '<p class="config-state">还没有可用于首页展示的作品图片。</p>'}
     </div>
     <div class="form-actions"><button class="editor-button primary" type="button" data-action="close-drawer">完成</button></div>`,
@@ -550,8 +553,8 @@ function toggleHomeFeatured(workId) {
   const selected = archiveData.site.homeFeaturedWorkIds || [];
   const index = selected.indexOf(workId);
   if (index >= 0) selected.splice(index, 1);
-  else if (selected.length < 3) selected.push(workId);
-  else { toast("首页最多展示三张图片，请先取消一张。"); return; }
+  else if (selected.length < 6) selected.push(workId);
+  else { toast("首页最多展示六张图片，请先取消一张。"); return; }
   archiveData.site.homeFeaturedWorkIds = selected;
   setDirty("首页展示图已更新，正在保存…");
   editHomeFeatured();
