@@ -99,16 +99,16 @@ h2 { margin: .1em 0; font-size: clamp(88px, 14vw, 210px); line-height: .9; lette
 @keyframes orbit { to { transform: rotate(360deg); } }
 .visual-note { position: absolute; z-index: 2; right: 18px; bottom: 18px; font-family: "STSong", "Songti SC", "SimSun", serif; font-size: 13px; font-weight: 300; font-synthesis: none; line-height: 1; color: white; letter-spacing: .12em; -webkit-font-smoothing: antialiased; }
 
-.panel--exhibition { padding: 108px 28px 35px; background: #14263b; }
-.section-heading { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 38px; }
+.panel--exhibition { padding: clamp(82px, 8svh, 108px) 28px clamp(20px, 2.5svh, 35px); background: #14263b; }
+.section-heading { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: clamp(18px, 2.4svh, 30px); }
 .section-heading__copy { display: flex; flex-direction: column; align-items: flex-start; }
 .section-heading h2 { margin: 20px 0 0; font-size: clamp(68px, 8.6vw, 128px); line-height: .88; letter-spacing: -.045em; }
 .section-heading h2,
 .media-copy h2 { font-family: "Songti SC", "STSong", "SimSun", serif; font-weight: 400; }
 .section-heading .text-link { font-family: "STSong", "Songti SC", "SimSun", serif; font-weight: 300; font-synthesis: none; letter-spacing: .04em; -webkit-font-smoothing: antialiased; }
 .exhibition-intro { margin: 20px 0 0 .08em; font-family: Arial, "PingFang SC", "Microsoft YaHei", sans-serif; font-size: clamp(15px, 1.15vw, 19px); font-weight: 400; line-height: 1.9; letter-spacing: .025em; color: rgba(231,237,240,.67); }
-.gallery-row { position: relative; height: auto; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); column-gap: 18px; row-gap: 30px; align-items: start; padding: 0 12px; border-inline: 3px solid rgba(128,157,170,.46); }
-.gallery-row::before { content: ""; position: absolute; z-index: 2; left: 0; right: 0; top: calc(50% - 15px); height: 10px; background: linear-gradient(to bottom, rgba(159,181,190,.88) 0 3px, rgba(75,102,119,.92) 3px 10px); box-shadow: 0 5px 10px rgba(4,12,26,.3); pointer-events: none; }
+.gallery-row { position: relative; height: auto; display: grid; grid-template-columns: repeat(3, minmax(0, min(28vw, 26svh))); justify-content: center; column-gap: clamp(12px, 1.2vw, 18px); row-gap: 22px; align-items: start; padding: 0 12px; border-inline: 3px solid rgba(128,157,170,.46); }
+.gallery-row::before { content: ""; position: absolute; z-index: 2; left: 0; right: 0; top: calc(50% - 11px); height: 10px; background: linear-gradient(to bottom, rgba(159,181,190,.88) 0 3px, rgba(75,102,119,.92) 3px 10px); box-shadow: 0 5px 10px rgba(4,12,26,.3); pointer-events: none; }
 .gallery-row::after { content: ""; position: absolute; z-index: 2; left: 0; right: 0; bottom: -10px; height: 10px; background: linear-gradient(to bottom, rgba(159,181,190,.9) 0 3px, rgba(75,102,119,.94) 3px 10px); box-shadow: 0 5px 10px rgba(4,12,26,.32); pointer-events: none; }
 .art-card { position: relative; z-index: 1; display: grid; grid-template-columns: clamp(15px, 1.2vw, 22px) minmax(0, 1fr); height: auto; aspect-ratio: 1.08 / 1; min-width: 0; overflow: hidden; padding: 0; background: #20384c; border: 2px solid rgba(225,235,236,.38); box-shadow: 0 12px 26px rgba(4,10,30,.2); transition: transform 220ms var(--ease-out), filter 220ms ease, box-shadow 220ms ease; }
 .art-card:hover { transform: translateY(-4px); filter: brightness(1.04); box-shadow: 0 18px 34px rgba(4,10,30,.28); }
