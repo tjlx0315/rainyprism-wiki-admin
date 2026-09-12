@@ -21,8 +21,6 @@
       </nav>
       <div class="section-count" aria-hidden="true"><span>01</span> / 05</div>
     </header>
-    <div class="scroll-edge" aria-hidden="true"></div>
-
     <main>
       <section id="home" class="panel hero" data-index="01">
         <div class="spectrum" aria-hidden="true">
@@ -50,29 +48,50 @@
           </p>
           <a class="text-link" href="wiki/">进入百科 <span>↗</span></a>
         </div>
-        <div class="visual visual--archive" aria-label="百科内容图片占位">
-          <span class="visual-note">人物｜组织｜区域｜事件</span>
-          <div class="archive-grid"></div>
-          <div class="archive-orbit"></div>
-        </div>
+        <a class="visual visual--archive encyclopedia-archive" href="wiki/" aria-label="进入百科，浏览人物、组织、区域和事件">
+          <span class="archive-kicker">RAINY PRISM ARCHIVE</span>
+          <article class="archive-card archive-card--people">
+            <small>01 / PEOPLE</small><strong>人物</strong><span>角色档案与关系</span>
+          </article>
+          <article class="archive-card archive-card--groups">
+            <small>02 / GROUPS</small><strong>组织</strong><span>机构、团体与阵营</span>
+          </article>
+          <article class="archive-card archive-card--places">
+            <small>03 / PLACES</small><strong>区域</strong><span>地点、版图与世界</span>
+          </article>
+          <article class="archive-card archive-card--events">
+            <small>04 / EVENTS</small><strong>事件</strong><span>时间与故事线索</span>
+          </article>
+          <span class="visual-note">点击进入完整百科 <b>↗</b></span>
+        </a>
       </section>
 
       <section id="exhibition" class="panel panel--exhibition" data-index="03">
-        <div class="section-heading">
-          <div class="section-heading__copy">
-            <span class="eyebrow">02｜EXHIBITION</span>
-            <h2>展览</h2>
-            <p class="exhibition-intro">We look. We connect. We feel alive.</p>
-          </div>
+        <div class="exhibition-copy">
+          <span class="eyebrow">02｜EXHIBITION</span>
+          <h2>展览</h2>
+          <p class="exhibition-intro">We look. We connect. We feel alive.</p>
           <a class="text-link" href="exhibition/">查看全部 <span>→</span></a>
         </div>
-        <div class="gallery-row">
-          <a class="art-card art-card--one" href="exhibition/"><span class="art-card__spine" aria-hidden="true"></span><span class="art-card__cover" aria-hidden="true"></span></a>
-          <a class="art-card art-card--two" href="exhibition/"><span class="art-card__spine" aria-hidden="true"></span><span class="art-card__cover" aria-hidden="true"></span></a>
-          <a class="art-card art-card--three" href="exhibition/"><span class="art-card__spine" aria-hidden="true"></span><span class="art-card__cover" aria-hidden="true"></span></a>
-          <a class="art-card art-card--four" href="exhibition/"><span class="art-card__spine" aria-hidden="true"></span><span class="art-card__cover" aria-hidden="true"></span></a>
-          <a class="art-card art-card--five" href="exhibition/"><span class="art-card__spine" aria-hidden="true"></span><span class="art-card__cover" aria-hidden="true"></span></a>
-          <a class="art-card art-card--six" href="exhibition/"><span class="art-card__spine" aria-hidden="true"></span><span class="art-card__cover" aria-hidden="true"></span></a>
+        <div class="exhibition-display">
+          <div class="gallery-grid">
+            <div class="gallery-level">
+              <div class="gallery-level__cards">
+                <a class="art-card art-card--one" href="exhibition/"><span class="art-card__spine" aria-hidden="true"></span><span class="art-card__cover" aria-hidden="true"></span></a>
+                <a class="art-card art-card--two" href="exhibition/"><span class="art-card__spine" aria-hidden="true"></span><span class="art-card__cover" aria-hidden="true"></span></a>
+                <a class="art-card art-card--three" href="exhibition/"><span class="art-card__spine" aria-hidden="true"></span><span class="art-card__cover" aria-hidden="true"></span></a>
+              </div>
+              <span class="gallery-shelf" aria-hidden="true"></span>
+            </div>
+            <div class="gallery-level">
+              <div class="gallery-level__cards">
+                <a class="art-card art-card--four" href="exhibition/"><span class="art-card__spine" aria-hidden="true"></span><span class="art-card__cover" aria-hidden="true"></span></a>
+                <a class="art-card art-card--five" href="exhibition/"><span class="art-card__spine" aria-hidden="true"></span><span class="art-card__cover" aria-hidden="true"></span></a>
+                <a class="art-card art-card--six" href="exhibition/"><span class="art-card__spine" aria-hidden="true"></span><span class="art-card__cover" aria-hidden="true"></span></a>
+              </div>
+              <span class="gallery-shelf" aria-hidden="true"></span>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -126,63 +145,5 @@
     </main>
 
     <script src="script.js"></script>
-    <script>
-      (() => {
-        const spectrum = document.querySelector('.spectrum');
-        const bandA = document.querySelector('.soft-band--a');
-        const bandB = document.querySelector('.soft-band--b');
-        let pointerX = innerWidth * .5;
-        let pointerY = innerHeight * .5;
-        let lastPointerTime = -Infinity;
-        let lastPaint = 0;
-
-        addEventListener('pointermove', (event) => {
-          pointerX = event.clientX;
-          pointerY = event.clientY;
-          lastPointerTime = performance.now();
-        }, { passive: true });
-
-        function animate(now) {
-          requestAnimationFrame(animate);
-          if (now - lastPaint < 32) return;
-          lastPaint = now;
-
-          const autoX = innerWidth * (.5 + Math.sin(now / 5200) * .22 + Math.sin(now / 9100) * .07);
-          const autoY = innerHeight * (.47 + Math.cos(now / 6700) * .17);
-          const idleFor = now - lastPointerTime;
-          const influence = Math.max(0, Math.min(1, 1 - (idleFor - 1200) / 2600));
-          const x = autoX * (1 - influence) + pointerX * influence;
-          const y = autoY * (1 - influence) + pointerY * influence;
-          const dx = x - innerWidth / 2;
-          const dy = y - innerHeight / 2;
-
-          spectrum.style.setProperty('--mx', `${(x / innerWidth) * 100}%`);
-          spectrum.style.setProperty('--my', `${(y / innerHeight) * 100}%`);
-          bandA.style.transform = `translate3d(${dx * .11}px, ${dy * .08}px, 0)`;
-          bandB.style.transform = `translate3d(${-dx * .065}px, ${-dy * .05}px, 0)`;
-        }
-
-        requestAnimationFrame(animate);
-
-        const lightPanels = new Set(['encyclopedia', 'multimedia']);
-        const headerToneObserver = new IntersectionObserver((entries) => {
-          entries.forEach((entry) => {
-            if (!entry.isIntersecting) return;
-            document.body.classList.toggle('header-on-light', lightPanels.has(entry.target.id));
-          });
-        }, { threshold: .58 });
-
-        document.querySelectorAll('.panel').forEach((panel) => headerToneObserver.observe(panel));
-
-        let scrollFrame = 0;
-        addEventListener('scroll', () => {
-          if (scrollFrame) return;
-          scrollFrame = requestAnimationFrame(() => {
-            document.body.classList.toggle('has-scrolled', scrollY > 24);
-            scrollFrame = 0;
-          });
-        }, { passive: true });
-      })();
-    </script>
   </body>
 </html>
